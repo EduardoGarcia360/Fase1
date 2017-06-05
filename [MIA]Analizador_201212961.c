@@ -1,5 +1,6 @@
 #include "[MIA]Analizador_201212961.h"
 #include "[MIA]ListaSE_201212961.h"
+#include "[MIA]MKDISK_201212961.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,6 +13,8 @@ char* limpiar();
 primera parte del analisis encargada de verficar si pertenece a mkdisk, rmdisk, etc
 */
 void analizador_general(){
+    Lista* mi_lista = (Lista*)malloc(sizeof(Lista));
+
     printf("Introduce linea de comando. (max. 200 caracteres):\n");
     char linea[200];
     scanf("%[^\n]s", &linea);
@@ -91,7 +94,7 @@ void analizador_general(){
                 sentencia=concat(sentencia, lexema);
                 printf("--sentencia: %s\n", sentencia);
                 correcto=1;
-                //agregar a lista
+                addFinal(mi_lista, categoria, comando, sentencia);
                 comando=limpiar();
                 sentencia=limpiar();
                 estado=1;
@@ -102,7 +105,7 @@ void analizador_general(){
                 sentencia=concat(sentencia, lexema);
                 printf("--sentencia: %s\n", sentencia);
                 correcto=1;
-                //agregar a lista
+                addFinal(mi_lista, categoria, comando, sentencia);
                 comando=limpiar();
                 sentencia=limpiar();
                 estado=1;
@@ -113,8 +116,8 @@ void analizador_general(){
                 caracter=tolower(caracter);
                 lexema=concat(lexema, &caracter);
                 estado=4;
-            }else if(caracter=='"'||caracter=='/'||caracter=='.'){
-                caracter=concat(lexema, &caracter);
+            }else if(caracter=='"'||caracter=='/'||caracter=='.'||caracter=='_'){
+                lexema=concat(lexema, &caracter);
                 estado=4;
             }else{
                 estado=99;
@@ -139,7 +142,7 @@ void analizador_general(){
     case 1:
         //mostrarLista(mi_lista);
         if(strcmp("mkdisk", tipo)==0){
-            //proceso_mkdisk(mi_lista, otra_linea);
+            proceso_mkdisk(mi_lista);
         }else if(strcmp("rmdisk", tipo)==0){
         }else{
             printf("Error:\n");
