@@ -9,6 +9,7 @@
 -todos los comandos para mkdisk son de tipo obligatorio (1)
 -cada metodo servira para realizar las validaciones correspondientes a cada comando
 que se usa en mkdisk: size, path y name.
+-como son 3 procesos al estar los 3 correctos se procede a crear el archivo
 */
 
 int proceso_tam(char* sentencia);
@@ -19,6 +20,7 @@ int proceso_nombre(char* sentencia);
 void proceso_mkdisk(Lista* lalista){
     NodoL* actual=lalista->inicio;
     int categoria, resultado;
+    int proceso=0;
     char* comando="";
     char* sentencia="";
     while(actual!=NULL){
@@ -26,12 +28,19 @@ void proceso_mkdisk(Lista* lalista){
         switch(categoria){
         case 1:
             if(strcmp("size",actual->comando)==0){
-
+                resultado=proceso_tam(actual->sentencia);
+                if(resultado==0){
+                    break;
+                }else{
+                    proceso++;
+                    printf("si es multiplo :v\n");
+                }
             }else if(strcmp("path",actual->comando)==0){
                 resultado=proceso_ruta(actual->sentencia);
                 if(resultado==0){
                     break;
                 }else{
+                    proceso++;
                     printf("que wena ruta alv\n");
                 }
             }else if(strcmp("name",actual->comando)==0){
@@ -39,6 +48,7 @@ void proceso_mkdisk(Lista* lalista){
                 if(resultado==0){
                     break;
                 }else{
+                    proceso++;
                     printf("que wen nombre xdxd\n");
                 }
             }else{
@@ -53,6 +63,12 @@ void proceso_mkdisk(Lista* lalista){
             break;
         }
         actual=actual->siguiente;
+    }
+
+    if(proceso==3){
+        printf("aki aria mi archivo si pudiera hacerlo >:v\n");
+    }else{
+        printf("proceso fallido.\n");
     }
 }
 
@@ -182,7 +198,18 @@ int validar_ruta(char* ruta){
     return correcto;
 }
 
+int proceso_tam(char* sentencia){
+    int correcto=0;
+    char aSent[4];
+    strcpy(aSent, sentencia);
+    int numero = atoi(aSent);
+    int mod = numero%8;
+    if(mod==0){
+        correcto=1;
+    }
 
+    return correcto;
+}
 
 
 

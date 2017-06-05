@@ -36,7 +36,7 @@ void analizador_general(){
             if(isspace(caracter)){
                 //con espacio se agrega el tipo: mkdisk &size...
                 tipo=concat(tipo,lexema);
-                printf("--tipo: %s\n", tipo);
+                printf("--tipo: %s\n\n", tipo);
                 lexema=limpiar();
                 estado=1;
             }else if(islower(caracter)||isupper(caracter)){
