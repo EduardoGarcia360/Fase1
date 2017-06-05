@@ -92,9 +92,10 @@ void analizador_general(){
                 //ej. 1: mkdisk $size=>32 $path...
                 //ej. 2: mkdisk $size=>32
                 sentencia=concat(sentencia, lexema);
-                printf("--sentencia: %s\n", sentencia);
+                printf("--sentencia: %s\n\n", sentencia);
                 correcto=1;
                 addFinal(mi_lista, categoria, comando, sentencia);
+                lexema=limpiar();
                 comando=limpiar();
                 sentencia=limpiar();
                 estado=1;
@@ -103,9 +104,10 @@ void analizador_general(){
                 //ej. 1: mkdisk $size=>32 en este caso seria 2.
                 lexema=concat(lexema, &caracter);
                 sentencia=concat(sentencia, lexema);
-                printf("--sentencia: %s\n", sentencia);
+                printf("--sentencia: %s\n\n", sentencia);
                 correcto=1;
                 addFinal(mi_lista, categoria, comando, sentencia);
+                lexema=limpiar();
                 comando=limpiar();
                 sentencia=limpiar();
                 estado=1;

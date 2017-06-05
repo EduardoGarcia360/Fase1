@@ -13,6 +13,7 @@ que se usa en mkdisk: size, path y name.
 
 int proceso_tam(char* sentencia);
 int proceso_ruta(char* sentencia);
+int validar_ruta(char* ruta);
 int proceso_nombre(char* sentencia);
 
 void proceso_mkdisk(Lista* lalista){
@@ -27,22 +28,27 @@ void proceso_mkdisk(Lista* lalista){
             if(strcmp("size",actual->comando)==0){
 
             }else if(strcmp("path",actual->comando)==0){
-
+                resultado=proceso_ruta(actual->sentencia);
+                if(resultado==0){
+                    break;
+                }else{
+                    printf("que wena ruta alv\n");
+                }
             }else if(strcmp("name",actual->comando)==0){
                 resultado=proceso_nombre(actual->sentencia);
                 if(resultado==0){
                     break;
                 }else{
-                    printf("nombre correcto\n");
+                    printf("que wen nombre xdxd\n");
                 }
             }else{
                 printf("\n\nError:\n");
-                printf("Comando %s desconocido asegurese de ingresar un comando valido.\n", actual->comando);
+                printf("Comando: %s, desconocido asegurese de ingresar un comando valido.\n", actual->comando);
             }
             break;
         default:
             printf("\n\nError:\n");
-            printf("La categoria de los comandos para MKDISK debe ser\n");
+            printf("La categoria de los comandos para MKDISK deben ser\n");
             printf("obligatoria -> ($).\n");
             break;
         }
@@ -107,10 +113,80 @@ int proceso_nombre(char* sentencia){
 
         if(estado==99){
             printf("\n\nError:\n");
-            printf("El dato %s no es un nombre valido.\n", sentencia);
+            printf("El dato: %s, no es un nombre valido.\n", sentencia);
             break;
         }
         pos++;
     }
     return correcto;
 }
+
+int proceso_ruta(char* sentencia){
+    int correcto=0;
+    correcto=validar_ruta(sentencia);
+    return correcto;
+}
+
+int validar_ruta(char* ruta){
+    int correcto=0;
+    char aRuta[50];
+    strcpy(aRuta, ruta);
+    int pos=0, estado=0;
+    int caracter;
+    while(aRuta[pos]!=NULL){
+        caracter=aRuta[pos];
+        switch(estado){
+        case 0:
+            if(caracter=='"'){
+                estado=1;
+            }else{
+                estado=99;
+            }
+        break;
+        case 1:
+            if(caracter=='/'){
+                estado=2;
+            }else{
+                estado=99;
+            }
+        break;
+        case 2:
+            if(islower(caracter)||isupper(caracter)){
+                estado=2;
+            }else if(caracter=='/'){
+                estado=3;
+            }else{
+                estado=99;
+            }
+        break;
+        case 3:
+            if(islower(caracter)||isupper(caracter)){
+                estado=2;
+                correcto=0;
+            }else if(caracter=='"'){
+                correcto=1;
+            }else{
+                estado=99;
+            }
+        break;
+        }//fin switch
+
+        if(estado==99){
+            printf("\n\nError:\n");
+            printf("La ruta: %s\n", ruta);
+            printf("no cumple con los requisitos para ser valida.\n");
+            break;
+        }
+        pos++;
+    }
+    return correcto;
+}
+
+
+
+
+
+
+
+
+////naaaaaaaaaaaada
