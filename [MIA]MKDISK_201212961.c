@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <sys/stat.h>
+#include <errno.h>
 
 /*
 -todos los comandos para mkdisk son de tipo obligatorio (1)
@@ -20,8 +22,9 @@ int proceso_ruta(char* sentencia);
 int validar_ruta(char* ruta);
 int proceso_nombre(char* sentencia);
 void crear_directorio(char* ruta);
-//void crear_disco(int tam, char* nombre, char* ruta);
-//char* concat(char* destino, char* letra); ya ha sido definido en analizador...
+void crear_disco(int tam, char* nombre, char* ruta);
+char* quitar_comillas(char* ruta);
+//char* concat: ya ha sido definido en analizador...
 
 void proceso_mkdisk(Lista* lalista){
     NodoL* actual=lalista->inicio;
@@ -215,6 +218,22 @@ int validar_ruta(char* ruta){
     return correcto;
 }
 
+char* quitar_comillas(char* ruta){
+    char aRuta[50];
+    strcpy(aRuta, ruta);
+    int pos=0;
+    int caracter;
+    char* limpia="";
+    while(aRuta[pos]!=NULL){
+        caracter=aRuta[pos];
+        if(caracter!='"'){
+            limpia=concat(limpia, &caracter);
+        }
+        pos++;
+    }
+    return limpia;
+}
+
 int proceso_tam(char* sentencia){
     int correcto=0;
     char aSent[4];
@@ -233,10 +252,10 @@ void crear_disco(int tam, char* nombre, char* ruta){
     //sprintf(tdisco->tamano, "%d", tam);
     //sprintf(tdisco->particiones, "d", 0);
     //sprintf(tdisco->puntero, "%d", (int)sizeof(tdisco));
-
+    ruta=quitar_comillas(ruta);
     ruta=concat(ruta,nombre);
-
-    FILE* f = fopen(ruta,"w+b");
+    printf("\n\nruta en crear disco: %s\n\n",ruta);
+    FILE* f = fopen(ruta,"wb");
     if(f!=NULL){
         char buffer[1024];
         for(int i=0; i<tam*1024; i++){
@@ -250,7 +269,7 @@ void crear_disco(int tam, char* nombre, char* ruta){
 }
 
 void crear_directorio(char* ruta){
-    char* comando = "sudo mkdir -p ";
+    char* comando = "mkdir -p ";
     comando=concat(comando, ruta);
     system(comando);
 }
