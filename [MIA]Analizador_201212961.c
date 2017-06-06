@@ -1,6 +1,7 @@
 #include "[MIA]Analizador_201212961.h"
 #include "[MIA]ListaSE_201212961.h"
 #include "[MIA]MKDISK_201212961.h"
+#include "[MIA]RMDISK_201212961.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -87,7 +88,7 @@ void analizador_general(){
             }
             break;
         case 4:
-            if(isspace(caracter)){
+            if(isspace(caracter) && linea[pos+1]=='$'){
                 //cuando encuentra un espacio indica que termino la sentencia o cuando termina la linea
                 //ej. 1: mkdisk $size=>32 $path...
                 //ej. 2: mkdisk $size=>32
@@ -112,6 +113,10 @@ void analizador_general(){
                 sentencia=limpiar();
                 estado=1;
             }else if(isdigit(caracter)){
+                lexema=concat(lexema, &caracter);
+                estado=4;
+            }else if(isspace(caracter)){
+                //ej. 1: rmdisk $path=>"/home/mis doc/eldisco_44.dsk"
                 lexema=concat(lexema, &caracter);
                 estado=4;
             }else if(islower(caracter)||isupper(caracter)){
@@ -146,6 +151,7 @@ void analizador_general(){
         if(strcmp("mkdisk", tipo)==0){
             proceso_mkdisk(mi_lista);
         }else if(strcmp("rmdisk", tipo)==0){
+            proceso_rmdisk(mi_lista);
         }else{
             printf("Error:\n");
             printf("Comando desconocido, verifique si pertenece a uno de estos formatos:\n");

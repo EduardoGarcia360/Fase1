@@ -1,5 +1,6 @@
 #include "[MIA]MKDISK_201212961.h"
 #include "[MIA]ListaSE_201212961.h"
+#include "[MIA]Estructuras_201212961.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,10 +13,15 @@ que se usa en mkdisk: size, path y name.
 -como son 3 procesos al estar los 3 correctos se procede a crear el archivo
 */
 
+char buffer[1];
+
 int proceso_tam(char* sentencia);
 int proceso_ruta(char* sentencia);
 int validar_ruta(char* ruta);
 int proceso_nombre(char* sentencia);
+void crear_directorio(char* ruta);
+//void crear_disco(int tam, char* nombre, char* ruta);
+//char* concat(char* destino, char* letra); ya ha sido definido en analizador...
 
 void proceso_mkdisk(Lista* lalista){
     NodoL* actual=lalista->inicio;
@@ -23,6 +29,10 @@ void proceso_mkdisk(Lista* lalista){
     int proceso=0;
     char* comando="";
     char* sentencia="";
+
+    int tam;
+    char* nombre="";
+    char* ruta="";
     while(actual!=NULL){
         categoria=actual->categoria;
         switch(categoria){
@@ -34,6 +44,9 @@ void proceso_mkdisk(Lista* lalista){
                 }else{
                     proceso++;
                     printf("si es multiplo :v\n");
+                    char aSent[4];
+                    strcpy(aSent,actual->sentencia);
+                    tam = atoi(aSent);
                 }
             }else if(strcmp("path",actual->comando)==0){
                 resultado=proceso_ruta(actual->sentencia);
@@ -42,6 +55,8 @@ void proceso_mkdisk(Lista* lalista){
                 }else{
                     proceso++;
                     printf("que wena ruta alv\n");
+                    ruta=concat(ruta,actual->sentencia);
+                    //crear_directorio(ruta);
                 }
             }else if(strcmp("name",actual->comando)==0){
                 resultado=proceso_nombre(actual->sentencia);
@@ -50,6 +65,7 @@ void proceso_mkdisk(Lista* lalista){
                 }else{
                     proceso++;
                     printf("que wen nombre xdxd\n");
+                    nombre=concat(nombre,actual->sentencia);
                 }
             }else{
                 printf("\n\nError:\n");
@@ -66,7 +82,8 @@ void proceso_mkdisk(Lista* lalista){
     }
 
     if(proceso==3){
-        printf("aki aria mi archivo si pudiera hacerlo >:v\n");
+        crear_directorio(ruta);
+        crear_disco(tam,nombre,ruta);
     }else{
         printf("proceso fallido.\n");
     }
@@ -211,7 +228,32 @@ int proceso_tam(char* sentencia){
     return correcto;
 }
 
+void crear_disco(int tam, char* nombre, char* ruta){
+    //struct Sdisco tdisco;
+    //sprintf(tdisco->tamano, "%d", tam);
+    //sprintf(tdisco->particiones, "d", 0);
+    //sprintf(tdisco->puntero, "%d", (int)sizeof(tdisco));
 
+    ruta=concat(ruta,nombre);
+
+    FILE* f = fopen(ruta,"w+b");
+    if(f!=NULL){
+        char buffer[1024];
+        for(int i=0; i<tam*1024; i++){
+            fwrite(buffer,sizeof(buffer),1,f);
+        }
+        printf("disco creado!\n");
+    }else{
+        printf("Error en disco alv\n");
+    }
+    fclose(f);
+}
+
+void crear_directorio(char* ruta){
+    char* comando = "sudo mkdir -p ";
+    comando=concat(comando, ruta);
+    system(comando);
+}
 
 
 
