@@ -12,13 +12,12 @@
 
 int rmproceso_ruta(char* sentencia);
 int rmvalidar_ruta(char* ruta);
-
+void eliminar_archivo(char* ruta);
 
 void proceso_rmdisk(Lista* lalista){
     NodoL* actual=lalista->inicio;
     int categoria, resultado;
-    int proceso;
-    char* comando="";
+    int proceso=0;
     char* sentencia="";
     while(actual!=NULL){
         categoria=actual->categoria;
@@ -31,10 +30,11 @@ void proceso_rmdisk(Lista* lalista){
                     }else{
                         proceso++;
                         printf("que wena ruta alv\n");
+                        sentencia=concat(sentencia,actual->sentencia);
                     }
                 }else{
                     printf("\n\nError:\n");
-                    printf("Comando: %s, desconocido para RMDISK unicamente comando path.\n", actual->comando);
+                    printf("Comando: %s, desconocido!. Para RMDISK unicamente comando path.\n", actual->comando);
                 }
             break;
             default:
@@ -47,9 +47,9 @@ void proceso_rmdisk(Lista* lalista){
     }
 
     if(proceso==1){
-        printf("borrar archivo alv :v\n");
+        eliminar_archivo(sentencia);
     }else{
-        printf("Proceso para RMDISK fallido.\n");
+        printf("\n\n****Proceso para RMDISK fallido.****\n");
     }
 }
 
@@ -89,6 +89,8 @@ int rmvalidar_ruta(char* ruta){
                     estado=3;
                 }else if(caracter=='_'){
                     estado=4;
+                }else if(caracter=='.'){
+                    estado=6;
                 }else{
                     estado=99;
                 }
@@ -158,22 +160,19 @@ int rmvalidar_ruta(char* ruta){
     return correcto;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+void eliminar_archivo(char* ruta){
+    ruta=quitar_comillas(ruta);
+    FILE* f=fopen(ruta,"rb");
+    if(f!=NULL){
+        fclose(f);//como si encontro el archivo lo cierra para despues borrarlo.
+        remove(ruta);
+        printf("\n\nProceso Completado:\n");
+        printf("El archivo de la ruta: %s, ha sido eliminado.\n", ruta);
+    }else{
+        printf("\n\nProceso no completado:\n");
+        printf("El archivo de la ruta: %s\n", ruta);
+        printf("ya ha sido eliminado o ingreso una ruta incorrecta.\n");
+    }
+}
 
 ///naaaaaada

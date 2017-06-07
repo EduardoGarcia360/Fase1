@@ -2,6 +2,7 @@
 #include "[MIA]ListaSE_201212961.h"
 #include "[MIA]MKDISK_201212961.h"
 #include "[MIA]RMDISK_201212961.h"
+#include "[MIA]FDISK_201212961.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -152,6 +153,8 @@ void analizador_general(){
             proceso_mkdisk(mi_lista);
         }else if(strcmp("rmdisk", tipo)==0){
             proceso_rmdisk(mi_lista);
+        }else if(strcmp("fdisk", tipo)==0){
+            proceso_fdisk(mi_lista);
         }else{
             printf("Error:\n");
             printf("Comando desconocido, verifique si pertenece a uno de estos formatos:\n");

@@ -7,6 +7,7 @@
 #include <ctype.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <time.h>
 
 /*
 -todos los comandos para mkdisk son de tipo obligatorio (1)
@@ -23,6 +24,7 @@ int validar_ruta(char* ruta);
 int proceso_nombre(char* sentencia);
 void crear_directorio(char* ruta);
 void crear_disco(int tam, char* nombre, char* ruta);
+void agregar_MBR(char* ruta, int tam);
 char* quitar_comillas(char* ruta);
 //char* concat: ya ha sido definido en analizador...
 
@@ -248,24 +250,66 @@ int proceso_tam(char* sentencia){
 }
 
 void crear_disco(int tam, char* nombre, char* ruta){
-    //struct Sdisco tdisco;
-    //sprintf(tdisco->tamano, "%d", tam);
-    //sprintf(tdisco->particiones, "d", 0);
-    //sprintf(tdisco->puntero, "%d", (int)sizeof(tdisco));
     ruta=quitar_comillas(ruta);
     ruta=concat(ruta,nombre);
-    printf("\n\nruta en crear disco: %s\n\n",ruta);
+    //printf("\n\nruta en crear disco: %s\n\n",ruta);
     FILE* f = fopen(ruta,"wb");
     if(f!=NULL){
         char buffer[1024];
         for(int i=0; i<tam*1024; i++){
             fwrite(buffer,sizeof(buffer),1,f);
         }
+        fclose(f);
         printf("disco creado!\n");
     }else{
         printf("Error en disco alv\n");
     }
-    fclose(f);
+    agregar_MBR(ruta, tam);
+}
+
+void agregar_MBR(char* ruta, int tam){
+    Mbr* nuevo = (Mbr*)malloc(sizeof(Mbr));
+
+    nuevo->mbr_tamano=tam*1024;
+    nuevo->mbr_fecha_creacion=time(0);
+    nuevo->mbr_disk_signature=12;
+    //los valores de la estructura Particion llevan valores nulos
+    //ya que aun no se crean dichas particiones
+    nuevo->mbr_partition_1.part_status='n';
+    nuevo->mbr_partition_1.part_type='n';
+    nuevo->mbr_partition_1.part_fit='n';
+    nuevo->mbr_partition_1.part_start=0;
+    nuevo->mbr_partition_1.part_size=0;
+    nuevo->mbr_partition_1.part_name='n';
+
+    nuevo->mbr_partition_2.part_status='n';
+    nuevo->mbr_partition_2.part_type='n';
+    nuevo->mbr_partition_2.part_fit='n';
+    nuevo->mbr_partition_2.part_start=0;
+    nuevo->mbr_partition_2.part_size=0;
+    nuevo->mbr_partition_2.part_name='n';
+
+    nuevo->mbr_partition_3.part_status='n';
+    nuevo->mbr_partition_3.part_type='n';
+    nuevo->mbr_partition_3.part_fit='n';
+    nuevo->mbr_partition_3.part_start=0;
+    nuevo->mbr_partition_3.part_size=0;
+    nuevo->mbr_partition_3.part_name='n';
+
+    nuevo->mbr_partition_4.part_status='n';
+    nuevo->mbr_partition_4.part_type='n';
+    nuevo->mbr_partition_4.part_fit='n';
+    nuevo->mbr_partition_4.part_start=0;
+    nuevo->mbr_partition_4.part_size=0;
+    nuevo->mbr_partition_4.part_name='n';
+
+    FILE* f=fopen(ruta,"r+b");
+    if(f!=NULL){
+        fseek(f,0, SEEK_SET);
+        fwrite(nuevo, sizeof(Mbr),1,f);
+        fclose(f);
+        printf("mbr agregado alv\n");
+    }
 }
 
 void crear_directorio(char* ruta){
