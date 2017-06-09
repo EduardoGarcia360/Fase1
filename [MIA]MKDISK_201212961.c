@@ -16,8 +16,6 @@ que se usa en mkdisk: size, path y name.
 -como son 3 procesos al estar los 3 correctos se procede a crear el archivo
 */
 
-char buffer[1];
-
 int proceso_tam(char* sentencia);
 int proceso_ruta(char* sentencia);
 int validar_ruta(char* ruta);
@@ -25,8 +23,9 @@ int proceso_nombre(char* sentencia);
 void crear_directorio(char* ruta);
 void crear_disco(int tam, char* nombre, char* ruta);
 void agregar_MBR(char* ruta, int tam);
+void copia_seguridad(char* ruta, int tam);
 char* quitar_comillas(char* ruta);
-//char* concat: ya ha sido definido en analizador...
+char* cambiar_nombre(char* nombre);
 
 void proceso_mkdisk(Lista* lalista){
     NodoL* actual=lalista->inicio;
@@ -48,7 +47,6 @@ void proceso_mkdisk(Lista* lalista){
                     break;
                 }else{
                     proceso++;
-                    printf("si es multiplo :v\n");
                     char aSent[4];
                     strcpy(aSent,actual->sentencia);
                     tam = atoi(aSent);
@@ -59,9 +57,7 @@ void proceso_mkdisk(Lista* lalista){
                     break;
                 }else{
                     proceso++;
-                    printf("que wena ruta alv\n");
                     ruta=concat(ruta,actual->sentencia);
-                    //crear_directorio(ruta);
                 }
             }else if(strcmp("name",actual->comando)==0){
                 resultado=proceso_nombre(actual->sentencia);
@@ -69,18 +65,18 @@ void proceso_mkdisk(Lista* lalista){
                     break;
                 }else{
                     proceso++;
-                    printf("que wen nombre xdxd\n");
                     nombre=concat(nombre,actual->sentencia);
                 }
             }else{
                 printf("\n\nError:\n");
-                printf("Comando: %s, desconocido asegurese de ingresar un comando valido.\n", actual->comando);
+                printf("Comando: %s, desconocido asegurese de ingresar un comando valido.\n\n", actual->comando);
+                break;
             }
             break;
         default:
             printf("\n\nError:\n");
-            printf("La categoria de los comandos para MKDISK deben ser\n");
-            printf("obligatoria -> ($).\n");
+            printf("La categoria de los comandos para MKDISK debe ser\n");
+            printf("obligatoria -> ($).\n\n");
             break;
         }
         actual=actual->siguiente;
@@ -90,7 +86,7 @@ void proceso_mkdisk(Lista* lalista){
         crear_directorio(ruta);
         crear_disco(tam,nombre,ruta);
     }else{
-        printf("proceso fallido.\n");
+        printf("Proceso para MKDISK fallido.\nVerifique que haya ingresado los datos correctamente.\n\n");
     }
 }
 
@@ -261,10 +257,47 @@ void crear_disco(int tam, char* nombre, char* ruta){
         }
         fclose(f);
         printf("disco creado!\n");
+        copia_seguridad(ruta, tam);
+        agregar_MBR(ruta, tam);
     }else{
         printf("Error en disco alv\n");
     }
-    agregar_MBR(ruta, tam);
+}
+
+void copia_seguridad(char* ruta, int tam){
+    ruta=cambiar_nombre(ruta);
+    FILE* f = fopen(ruta, "wb");
+    if(f!=NULL){
+        char buffer[1024];
+        for(int i=0; i<tam*1024; i++){
+            fwrite(buffer, sizeof(buffer), 1, f);
+        }
+        fclose(f);
+        printf("Copia realizada con exito.\n");
+        agregar_MBR(ruta, tam);
+    }else{
+        printf("Error al crear la copia.\n");
+    }
+}
+
+char* cambiar_nombre(char* nombre){
+    //recibe: /home/eduardo/pruebas/disco_32.dsk
+    //retorna: /home/eduardo/pruebas/disco_32_copia.dsk
+    char aNombre[30];
+    strcpy(aNombre, nombre);
+    int pos=0;
+    int caracter;
+    char* cambiado="";
+    while(aNombre[pos]!=NULL){
+        caracter=aNombre[pos];
+        if(caracter=='.'){
+            cambiado=concat(cambiado, "_copia.");
+        }else{
+            cambiado=concat(cambiado, &caracter);
+        }
+        pos++;
+    }
+    return cambiado;
 }
 
 void agregar_MBR(char* ruta, int tam){
@@ -308,7 +341,7 @@ void agregar_MBR(char* ruta, int tam){
         fseek(f,0, SEEK_SET);
         fwrite(nuevo, sizeof(Mbr),1,f);
         fclose(f);
-        printf("mbr agregado alv\n");
+        printf("MBR agregado con exito.\n");
     }
 }
 

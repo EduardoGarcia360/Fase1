@@ -89,7 +89,7 @@ void analizador_general(){
             }
             break;
         case 4:
-            if(isspace(caracter) && linea[pos+1]=='$'){
+            if(isspace(caracter) && linea[pos+1]=='$' || isspace(caracter) && linea[pos+1]=='@'){
                 //cuando encuentra un espacio indica que termino la sentencia o cuando termina la linea
                 //ej. 1: mkdisk $size=>32 $path...
                 //ej. 2: mkdisk $size=>32
