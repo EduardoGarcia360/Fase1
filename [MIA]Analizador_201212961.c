@@ -3,6 +3,7 @@
 #include "[MIA]MKDISK_201212961.h"
 #include "[MIA]RMDISK_201212961.h"
 #include "[MIA]FDISK_201212961.h"
+#include "[MIA]MKFILE_201212961.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,11 +17,10 @@ primera parte del analisis encargada de verficar si pertenece a mkdisk, rmdisk, 
 */
 void analizador_general(){
     Lista* mi_lista = (Lista*)malloc(sizeof(Lista));
-
-    printf("Introduce linea de comando. (max. 200 caracteres):\n");
     char linea[200];
+    printf("Introduce linea de comando. (max. 200 caracteres):\n");
     scanf("%[^\n]s", &linea);
-    printf("la linea es: %s\n", linea);
+    //printf("la linea es: %s\n", linea);
 
     int pos=0, estado=0, correcto=0;
     char* tipo="";
@@ -148,16 +148,18 @@ void analizador_general(){
 
 	switch(correcto){
     case 1:
-        //mostrarLista(mi_lista);
+        //showLista(mi_lista);
         if(strcmp("mkdisk", tipo)==0){
             proceso_mkdisk(mi_lista);
         }else if(strcmp("rmdisk", tipo)==0){
             proceso_rmdisk(mi_lista);
         }else if(strcmp("fdisk", tipo)==0){
             proceso_fdisk(mi_lista);
+        }else if(strcmp("mkfile", tipo)==0){
+            proceso_mkfile(mi_lista);
         }else{
             printf("Error:\n");
-            printf("Comando desconocido, verifique si pertenece a uno de estos formatos:\n");
+            printf("Tipo desconocido, verifique si pertenece a uno de estos comandos:\n");
             printf("mkdisk, rmdisk, etc.\n");
         }
         break;

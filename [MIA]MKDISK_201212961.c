@@ -185,7 +185,7 @@ int validar_ruta(char* ruta){
             }
         break;
         case 2:
-            if(islower(caracter)||isupper(caracter)){
+            if(islower(caracter)){
                 estado=2;
             }else if(caracter=='/'){
                 estado=3;
@@ -194,7 +194,7 @@ int validar_ruta(char* ruta){
             }
         break;
         case 3:
-            if(islower(caracter)||isupper(caracter)){
+            if(islower(caracter)){
                 estado=2;
                 correcto=0;
             }else if(caracter=='"'){
@@ -248,7 +248,6 @@ int proceso_tam(char* sentencia){
 void crear_disco(int tam, char* nombre, char* ruta){
     ruta=quitar_comillas(ruta);
     ruta=concat(ruta,nombre);
-    //printf("\n\nruta en crear disco: %s\n\n",ruta);
     FILE* f = fopen(ruta,"wb");
     if(f!=NULL){
         char buffer[1024];
@@ -283,7 +282,7 @@ void copia_seguridad(char* ruta, int tam){
 char* cambiar_nombre(char* nombre){
     //recibe: /home/eduardo/pruebas/disco_32.dsk
     //retorna: /home/eduardo/pruebas/disco_32_copia.dsk
-    char aNombre[30];
+    char aNombre[100];
     strcpy(aNombre, nombre);
     int pos=0;
     int caracter;
@@ -303,7 +302,7 @@ char* cambiar_nombre(char* nombre){
 void agregar_MBR(char* ruta, int tam){
     Mbr* nuevo = (Mbr*)malloc(sizeof(Mbr));
 
-    nuevo->mbr_tamano=tam*1024;
+    nuevo->mbr_tamano=tam*1024*1024;
     nuevo->mbr_fecha_creacion=time(0);
     nuevo->mbr_disk_signature=12;
     //los valores de la estructura Particion llevan valores nulos
@@ -313,28 +312,28 @@ void agregar_MBR(char* ruta, int tam){
     nuevo->mbr_partition_1.part_fit='n';
     nuevo->mbr_partition_1.part_start=0;
     nuevo->mbr_partition_1.part_size=0;
-    nuevo->mbr_partition_1.part_name='n';
+    strcpy(nuevo->mbr_partition_1.part_name,"");
 
     nuevo->mbr_partition_2.part_status='n';
     nuevo->mbr_partition_2.part_type='n';
     nuevo->mbr_partition_2.part_fit='n';
     nuevo->mbr_partition_2.part_start=0;
     nuevo->mbr_partition_2.part_size=0;
-    nuevo->mbr_partition_2.part_name='n';
+    strcpy(nuevo->mbr_partition_2.part_name,"");
 
     nuevo->mbr_partition_3.part_status='n';
     nuevo->mbr_partition_3.part_type='n';
     nuevo->mbr_partition_3.part_fit='n';
     nuevo->mbr_partition_3.part_start=0;
     nuevo->mbr_partition_3.part_size=0;
-    nuevo->mbr_partition_3.part_name='n';
+    strcpy(nuevo->mbr_partition_3.part_name,"");
 
     nuevo->mbr_partition_4.part_status='n';
     nuevo->mbr_partition_4.part_type='n';
     nuevo->mbr_partition_4.part_fit='n';
     nuevo->mbr_partition_4.part_start=0;
     nuevo->mbr_partition_4.part_size=0;
-    nuevo->mbr_partition_4.part_name='n';
+    strcpy(nuevo->mbr_partition_4.part_name,"");
 
     FILE* f=fopen(ruta,"r+b");
     if(f!=NULL){

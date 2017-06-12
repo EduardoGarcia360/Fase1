@@ -5,13 +5,12 @@
 typedef struct Sdisco Sdisco;
 typedef struct Mbr Mbr;
 typedef struct Particion Particion;
+typedef struct EBR EBR;
 typedef struct FDISK FDISK;
 
 struct Sdisco{
-    char nombre[50];
+    char nombre[20];
     char tamano[5];
-    char particiones[9];
-    char puntero[9];
 };
 
 struct Particion{
@@ -20,7 +19,16 @@ struct Particion{
     char part_fit;
     int part_start;
     int part_size;
-    char part_name;
+    char part_name[16];
+};
+
+struct EBR{
+    char part_status;
+    char part_fit;
+    int part_start;
+    int part_size;
+    int part_next;
+    char part_name[16];
 };
 
 //usado en mkdisk
@@ -37,13 +45,13 @@ struct Mbr{
 struct FDISK{
         //obligatorios
     int SIZE;
-    char* PATH;
-    char* NAME;
+    char PATH[100];
+    char NAME[30];
         //opcionales
-    char UNIT[1];
-    char TYPE[1];
-    char FIT[1];
-    char _DELETE[1];
+    char UNIT;
+    char TYPE;
+    char FIT[2];//(para dos o mas se utiliza array)
+    char _DELETE;
     int ADD;
     int MOV; //aun no se que es
 };
