@@ -15,18 +15,20 @@ int fvalidar_nombre(char* nombre);
 int fvalidar_ruta(char* ruta);
 void crear_particion(FDISK* datos);
 void par_uno(FILE* f, FDISK* datos, Mbr mbr_leido);
-void par_dos();
+void par_dos(FILE* f, FDISK* datos, Mbr mbr_leido);
 void par_tres();
 void par_cuatro();
+int tam_total(FDISK* datos);
 
 void proceso_fdisk(Lista* lalista){
     NodoL* actual=lalista->inicio;
 
     int categoria, resultado;
-    int proceso=0;
+    int proceso=0, fallo=0;
 
     //Datos por default: datos que tienen que aparecer en caso de que falten por ser opcionales.
     FDISK* admin_part = (FDISK*)malloc(sizeof(FDISK));
+    admin_part->SIZE=-1;
     admin_part->UNIT='k';
     admin_part->TYPE='p';
     strcpy(admin_part->FIT, "wf");//para mas de dos caracteres
@@ -39,21 +41,24 @@ void proceso_fdisk(Lista* lalista){
         switch(categoria){
         case 1:
             if(strcmp("size",actual->comando)==0){
-                if(actual->sentencia>0){
-                    admin_part->SIZE=actual->sentencia;
+                char aSent[2];
+                strcpy(aSent,actual->sentencia);
+                int tam = atoi(aSent);
+                if(tam>0){
+                    admin_part->SIZE=tam;
                     proceso++;
-                    printf("SIZE EN FDISK: %s\n", admin_part->SIZE);
+                    printf("SIZE EN FDISK: %i\n", admin_part->SIZE);
                 }else{
                     proceso=0;
                     printf("\n\nError:\n");
-                    printf("La sentencia %d debe ser positivo y mayor a cero.\n",actual->sentencia);
-                    break;
+                    printf("El tamaño '%d' debe ser positivo y mayor a cero.\n", tam);
+                    fallo=1;
                 }
             }else if(strcmp("path",actual->comando)==0){
                 resultado=fvalidar_ruta(actual->sentencia);
                 if(resultado==0){
                     proceso=0;
-                    break;
+                    fallo=1;
                 }else{
                     proceso++;
                     actual->sentencia=quitar_comillas(actual->sentencia);
@@ -64,7 +69,7 @@ void proceso_fdisk(Lista* lalista){
                 resultado=fvalidar_nombre(actual->sentencia);
                 if(resultado==0){
                     proceso=0;
-                    break;
+                    fallo=1;
                 }else{
                     proceso++;
                     strcpy(admin_part->NAME, actual->sentencia);
@@ -73,7 +78,7 @@ void proceso_fdisk(Lista* lalista){
             }else{
                 printf("\n\nError:\n");
                 printf("Comando tipo $: %s, desconocido asegurese de ingresar un comando valido.\n\n", actual->comando);
-                break;
+                fallo=1;
             }
         break;
         case 2:
@@ -85,6 +90,7 @@ void proceso_fdisk(Lista* lalista){
                     printf("\n\nError:\n");
                     printf("La unidad para la particion debe ser en:\n-B: bytes\n-K: kilobytes\n-M: megabytes\n");
                     proceso=0;
+                    fallo=1;
                 }
             }else if(strcmp("type",actual->comando)==0){
                 if(strcmp("p",actual->sentencia)==0 || strcmp("e",actual->sentencia)==0 || strcmp("l",actual->sentencia)==0){
@@ -94,17 +100,19 @@ void proceso_fdisk(Lista* lalista){
                     printf("\n\nError:\n");
                     printf("El tipo de particion debe ser:\n-P: particion primaria\n-E: particion extendida\n-L: particion logica\n");
                     proceso=0;
+                    fallo=1;
                 }
             }else if(strcmp("fit",actual->comando)==0){
                 if(strcmp("bf",actual->sentencia)==0||strcmp("ff",actual->sentencia)==0||strcmp("wf",actual->sentencia)==0){
                     strcpy(admin_part->FIT, actual->sentencia);
-                    printf("FIT EN FDISK: %c\n", admin_part->FIT);
+                    printf("FIT EN FDISK: %s\n", admin_part->FIT);
                 }else{
                     printf("\n\nError:\n");
                     printf("El ajuste para la particion debe ser:\n-BF: Best Fit (mejor ajuste)\n");
                     printf("-FF: First Fit (primer ajuste)\n");
                     printf("-WF: Worst Fit (peor ajuste)\n");
                     proceso=0;
+                    fallo=1;
                 }
             }else if(strcmp("delete",actual->comando)==0){
             }else if(strcmp("add",actual->comando)==0){
@@ -113,12 +121,16 @@ void proceso_fdisk(Lista* lalista){
                 printf("\n\nError:\n");
                 printf("Comando tipo @: %s, desconocido asegurese de ingresar un comando valido.\n\n", actual->comando);
                 proceso=0;
-                break;
+                fallo=1;
             }
         break;
         default:
             printf("\n\nError:\n");
         break;
+        }
+
+        if(fallo==1){
+            break;
         }
         actual=actual->siguiente;
     }
@@ -283,18 +295,26 @@ int fvalidar_ruta(char* ruta){
 }
 
 void crear_particion(FDISK* datos){
-    //Mbr* mbr_leido = (Mbr*)malloc(sizeof(Mbr));
     Mbr mbr_leido;
     FILE* f = fopen(datos->PATH,"r+b");
     if(f!=NULL){
-        printf("entro en el archivo\n");
         fseek(f, 0, SEEK_SET);
         fread(&mbr_leido, sizeof(Mbr), 1, f);
-        printf("Tamano mbr: %i bytes.\n", mbr_leido.mbr_tamano);
-        //printf("Tamaño del struct: %i bytes.\n", sizeof(mbr_leido));
+        printf("==============================\n");
+        printf("inicio: %i\n", mbr_leido.mbr_partition_1.part_start);
+        printf("size: %i\n", mbr_leido.mbr_partition_1.part_size);
+        printf("tipo: %c\n", mbr_leido.mbr_partition_1.part_type);
+        printf("nombre: %s\n", mbr_leido.mbr_partition_1.part_name);
+        printf("==============================\n");
 
-        if(mbr_leido.mbr_partition_1.part_size==0){
+        int tam_ingresado=tam_total(datos);//retorna el tamaño en bytes
+
+        if(mbr_leido.mbr_partition_1.part_size==0 || tam_ingresado<(mbr_leido.mbr_partition_1.part_size)){
             par_uno(f, datos, mbr_leido);
+        }else if(mbr_leido.mbr_partition_2.part_size==0 || tam_ingresado<(mbr_leido.mbr_partition_2.part_size)){
+            par_dos(f, datos, mbr_leido);
+        }else{
+            printf("el tamaño ingresado: %i es demasiado grande para caber en una particion\n", datos->SIZE);
         }
         fclose(f);
     }else{
@@ -305,14 +325,71 @@ void crear_particion(FDISK* datos){
 }
 
 void par_uno(FILE* f, FDISK* datos, Mbr mbr_leido){
-    printf("Ingresando en la Particion 1.\n");
+    printf("*****Ingresando en la Particion 1*****\n");
     fseek(f, 0, SEEK_SET);
-    strcpy(mbr_leido.mbr_partition_1.part_fit, datos->FIT);
-    printf("fit de mbr leido: %c\n", mbr_leido.mbr_partition_1.part_fit);
+
+    /*asignamos los datos del MBR leido en la particion 1*/
+    mbr_leido.mbr_partition_1.part_status='n';
+
     mbr_leido.mbr_partition_1.part_type = datos->TYPE;
     printf("tipo de mbr leido: %c\n", mbr_leido.mbr_partition_1.part_type);
+
+    size_t size_destino = sizeof(mbr_leido.mbr_partition_1.part_fit);
+    strncpy(mbr_leido.mbr_partition_1.part_fit, datos->FIT, size_destino);
+    printf("fit de mbr leido: %s\n", mbr_leido.mbr_partition_1.part_fit);
+
+    mbr_leido.mbr_partition_1.part_size = tam_total(datos);
+    printf("size de mbr leido: %i en bytes\n", mbr_leido.mbr_partition_1.part_size);
+
+    //se indica donde empezara la particion 2
+    mbr_leido.mbr_partition_2.part_start=sizeof(Mbr)+mbr_leido.mbr_partition_1.part_size+1;
+
+    strcpy(mbr_leido.mbr_partition_1.part_name, datos->NAME);
+    printf("nombre de mbr leido: %s\n", mbr_leido.mbr_partition_1.part_name);
+
+    printf("*****Termiando de agregar datos*****\n");
+
+    //se guardan los cambios
+    fwrite(&mbr_leido, sizeof(Mbr), 1, f);
 }
 
+void par_dos(FILE* f, FDISK* datos, Mbr mbr_leido){
+    printf("*****Ingresando en la Particion 2*****\n");
+    fseek(f, 0, SEEK_SET);
+
+    /*asignamos los datos del MBR leido en la particion 1*/
+    mbr_leido.mbr_partition_2.part_status='n';
+
+    mbr_leido.mbr_partition_2.part_type = datos->TYPE;
+
+    size_t size_destino = sizeof(mbr_leido.mbr_partition_2.part_fit);
+    strncpy(mbr_leido.mbr_partition_2.part_fit, datos->FIT, size_destino);
+
+    //se indica donde empezara la particion 3
+    mbr_leido.mbr_partition_3.part_start = sizeof(Mbr)+mbr_leido.mbr_partition_1.part_size+mbr_leido.mbr_partition_2.part_size+1;
+
+    mbr_leido.mbr_partition_2.part_size = tam_total(datos);
+
+    strcpy(mbr_leido.mbr_partition_2.part_name, datos->NAME);
+
+    printf("*****Termiando de agregar datos*****\n");
+
+    //se guardan los cambios
+    fwrite(&mbr_leido, sizeof(Mbr), 1, f);
+}
+
+int tam_total(FDISK* datos){
+    int d=datos->SIZE;
+    int retorno=0;
+    if(datos->UNIT=='b'){
+        retorno = d;
+    }else if(datos->UNIT=='k'){
+        retorno = d*1024;
+    }else{
+        retorno = d*1024*1024;
+    }
+    return retorno;
+}
 
 
 

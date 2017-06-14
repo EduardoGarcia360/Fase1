@@ -302,35 +302,37 @@ char* cambiar_nombre(char* nombre){
 void agregar_MBR(char* ruta, int tam){
     Mbr* nuevo = (Mbr*)malloc(sizeof(Mbr));
 
-    nuevo->mbr_tamano=tam*1024*1024;
+    nuevo->mbr_tamano=tam*1024*1024; //tamaño en bytes
     nuevo->mbr_fecha_creacion=time(0);
     nuevo->mbr_disk_signature=12;
-    //los valores de la estructura Particion llevan valores nulos
-    //ya que aun no se crean dichas particiones
+    /*
+    los valores de la estructura Particion llevan valores nulos
+    ya que aun no se crean dichas particiones
+    */
     nuevo->mbr_partition_1.part_status='n';
     nuevo->mbr_partition_1.part_type='n';
-    nuevo->mbr_partition_1.part_fit='n';
-    nuevo->mbr_partition_1.part_start=0;
+    strcpy(nuevo->mbr_partition_1.part_fit, "n");
+    nuevo->mbr_partition_1.part_start=sizeof(Mbr)+1; //la particion inicia despues del tamaño del mbr
     nuevo->mbr_partition_1.part_size=0;
     strcpy(nuevo->mbr_partition_1.part_name,"");
 
     nuevo->mbr_partition_2.part_status='n';
     nuevo->mbr_partition_2.part_type='n';
-    nuevo->mbr_partition_2.part_fit='n';
+    strcpy(nuevo->mbr_partition_2.part_fit, "n");
     nuevo->mbr_partition_2.part_start=0;
     nuevo->mbr_partition_2.part_size=0;
     strcpy(nuevo->mbr_partition_2.part_name,"");
 
     nuevo->mbr_partition_3.part_status='n';
     nuevo->mbr_partition_3.part_type='n';
-    nuevo->mbr_partition_3.part_fit='n';
+    strcpy(nuevo->mbr_partition_3.part_fit, "n");
     nuevo->mbr_partition_3.part_start=0;
     nuevo->mbr_partition_3.part_size=0;
     strcpy(nuevo->mbr_partition_3.part_name,"");
 
     nuevo->mbr_partition_4.part_status='n';
     nuevo->mbr_partition_4.part_type='n';
-    nuevo->mbr_partition_4.part_fit='n';
+    strcpy(nuevo->mbr_partition_4.part_fit, "n");
     nuevo->mbr_partition_4.part_start=0;
     nuevo->mbr_partition_4.part_size=0;
     strcpy(nuevo->mbr_partition_4.part_name,"");

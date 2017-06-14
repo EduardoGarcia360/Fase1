@@ -38,7 +38,7 @@ void analizador_general(){
             if(isspace(caracter)){
                 //con espacio se agrega el tipo: mkdisk &size...
                 tipo=concat(tipo,lexema);
-                printf("--tipo: %s\n\n", tipo);
+                //printf("--tipo: %s\n\n", tipo);
                 lexema=limpiar();
                 estado=1;
             }else if(islower(caracter)||isupper(caracter)){
@@ -55,11 +55,11 @@ void analizador_general(){
                 estado=1;
             }else if(caracter=='$'){
                 categoria=1;
-                printf("--categoria obligatorio\n");
+                //printf("--categoria obligatorio\n");
                 estado=2;
             }else if(caracter=='@'){
                 categoria=2;
-                printf("--categoria opcional\n");
+                //printf("--categoria opcional\n");
                 estado=2;
             }else{
                 estado=99;
@@ -81,7 +81,7 @@ void analizador_general(){
             if(caracter=='>'){
                 //comandos serian: size, path, etc
                 comando=concat(comando, lexema);
-                printf("--comando: %s\n", comando);
+                //printf("--comando: %s\n", comando);
                 lexema=limpiar();
                 estado=4;
             }else{
@@ -104,6 +104,7 @@ void analizador_general(){
             }else if(linea[pos+1]==NULL){
                 //entra en esta parte cuando es el final de linea se concatena ya que estamos en el ultimo caracter
                 //ej. 1: mkdisk $size=>32 en este caso seria 2.
+                caracter=tolower(caracter);
                 lexema=concat(lexema, &caracter);
                 sentencia=concat(sentencia, lexema);
                 printf("--sentencia: %s\n\n", sentencia);
@@ -147,6 +148,10 @@ void analizador_general(){
 	}//fin while
 
 	switch(correcto){
+    case 0:
+        printf("\n\nError:\n");
+        printf("Linea de comando no valida.\n");
+        break;
     case 1:
         //showLista(mi_lista);
         if(strcmp("mkdisk", tipo)==0){
@@ -164,6 +169,7 @@ void analizador_general(){
         }
         break;
     }
+    return;
 }
 
 char* concat(char* destino, char* letra){
