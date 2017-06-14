@@ -17,9 +17,9 @@ void crear_particion(FDISK* datos);
 void par_uno(FILE* f, FDISK* datos, Mbr mbr_leido);
 void par_dos(FILE* f, FDISK* datos, Mbr mbr_leido);
 void par_tres(FILE* f, FDISK* datos, Mbr mbr_leido);
-void par_cuatro(FILE* f, FDISK* datos, Mbr mbr_leido);
-void elegir_primaria(FILE* f, FDISK* datos, Mbr mbr_leido);
-void elegir_extendida();
+void par_cuatro(FILE* f, FDISK* datos, Mbr mbr_leido, int restante);
+void asignar_primaria_extendida(FILE* f, FDISK* datos, Mbr mbr_leido);
+void asignar_logica(FILE* f, FDISK* datos, Mbr mbr_leido);
 int tam_total(FDISK* datos);
 
 void proceso_fdisk(Lista* lalista){
@@ -306,8 +306,9 @@ void crear_particion(FDISK* datos){
         int tam_ingresado=tam_total(datos);//retorna el tamaño en bytes
         if(tam_ingresado < mbr_leido.mbr_tamano){
             if(datos->TYPE=='p' || datos->TYPE=='e'){
-                elegir_primaria(f, datos, mbr_leido);
+                asignar_primaria_extendida(f, datos, mbr_leido);
             }else if(datos->TYPE=='l'){
+                asignar_logica(f, datos, mbr_leido);
             }
         }else{
             int tmp1 = mbr_leido.mbr_tamano/1024;
@@ -324,7 +325,7 @@ void crear_particion(FDISK* datos){
     }
 }
 
-void elegir_primaria(FILE* f, FDISK* datos, Mbr mbr_leido){
+void asignar_primaria_extendida(FILE* f, FDISK* datos, Mbr mbr_leido){
     if(mbr_leido.mbr_partition_1.part_size==0){//la particion aun no tiene tamaño
         par_uno(f, datos, mbr_leido);
     }else if(mbr_leido.mbr_partition_2.part_size==0){
@@ -332,9 +333,39 @@ void elegir_primaria(FILE* f, FDISK* datos, Mbr mbr_leido){
     }else if(mbr_leido.mbr_partition_3.part_size==0){
         par_tres(f, datos, mbr_leido);
     }else if(mbr_leido.mbr_partition_4.part_size==0){
-        par_cuatro(f, datos, mbr_leido);
+        /*se calcula el tamaño exacto que resta para la particion 4*/
+        int tam_total_disco = mbr_leido.mbr_tamano;
+        int restante = tam_total_disco-(sizeof(Mbr)+mbr_leido.mbr_partition_1.part_size+mbr_leido.mbr_partition_2.part_size+mbr_leido.mbr_partition_3.part_size);
+
+        int ingresado = tam_total(datos);//cantidad ingresada por el usuario para esta particion
+        int mega = 1024*1024;//un megabyte
+
+        if((ingresado-restante)<mega){
+            /*si lo ingresado menos lo que queda es menor a un 1MB*/
+            par_cuatro(f, datos, mbr_leido, restante);
+        }else{
+            /*si lo ingresado menos lo que queda es mayor a un 1MB*/
+            printf("\n\nError:\n");
+            printf("El tamaño ingresado para la particion 4 sobrepasa lo restante en el disco\n");
+            printf("Espacio restante en disco: %i en bytes\n", restante);
+        }
     }else{
         printf("Las cuatro particiones ya no estan disponibles.\nCree otro disco o borre una particion.\n");
+    }
+}
+
+void asignar_logica(FILE* f, FDISK* datos, Mbr mbr_leido){
+    if(mbr_leido.mbr_partition_1.part_type=='e'){
+        //algo xdxd
+    }else if(mbr_leido.mbr_partition_1.part_type=='e'){
+        //algo xdxd
+    }else if(mbr_leido.mbr_partition_1.part_type=='e'){
+        //algo xdxd
+    }else if(mbr_leido.mbr_partition_1.part_type=='e'){
+        //algo xdxd
+    }else{
+        printf("\n\nError:\n");
+        printf("No existen particiones de tipo Extendida en la que se pueda crear una particion Logica.\n");
     }
 }
 
@@ -347,10 +378,9 @@ void par_uno(FILE* f, FDISK* datos, Mbr mbr_leido){
 
     mbr_leido.mbr_partition_1.part_type = datos->TYPE;
 
-    size_t size_destino = sizeof(mbr_leido.mbr_partition_1.part_fit);
-    strncpy(mbr_leido.mbr_partition_1.part_fit, datos->FIT, size_destino);
+    strncpy(mbr_leido.mbr_partition_1.part_fit, datos->FIT, 2);
 
-    mbr_leido.mbr_partition_1.part_size = tam_total(datos);
+    mbr_leido.mbr_partition_1.part_size = tam_total(datos);//en bytes
 
     //se indica donde empezara la particion 2
     mbr_leido.mbr_partition_2.part_start=sizeof(Mbr)+mbr_leido.mbr_partition_1.part_size+1;
@@ -359,14 +389,18 @@ void par_uno(FILE* f, FDISK* datos, Mbr mbr_leido){
 
     printf("*****Termiando de agregar datos\n.\n.\n");
 
-    //se guardan los cambios
-    fwrite(&mbr_leido, sizeof(Mbr), 1, f);
     printf("*****RESUMEN DE DATOS INGRESADOS EN LA PARTICION 1:\n");
     printf("-Tipo de particion: %c\n", mbr_leido.mbr_partition_1.part_type);
     printf("-Ajuste de particion (FIT): %s\n", mbr_leido.mbr_partition_1.part_fit);
     printf("-Tamaño asignado: %i en %c\n", datos->SIZE, datos->UNIT);
     printf("-Inicio de particion: %i en bytes\n", mbr_leido.mbr_partition_1.part_start);
-    printf("-Nombre asignado: %s\n\n", mbr_leido.mbr_partition_1.part_name);
+    printf("-Nombre asignado: %s\n", mbr_leido.mbr_partition_1.part_name);
+    int tam_total_disco = mbr_leido.mbr_tamano;
+    int restante = tam_total_disco-(sizeof(Mbr)+mbr_leido.mbr_partition_1.part_size);
+    printf("-Espacio restante: %i\n\n", restante);
+
+    //se guardan los cambios
+    fwrite(&mbr_leido, sizeof(Mbr), 1, f);
 }
 
 void par_dos(FILE* f, FDISK* datos, Mbr mbr_leido){
@@ -378,8 +412,7 @@ void par_dos(FILE* f, FDISK* datos, Mbr mbr_leido){
 
     mbr_leido.mbr_partition_2.part_type = datos->TYPE;
 
-    size_t size_destino = sizeof(mbr_leido.mbr_partition_2.part_fit);
-    strncpy(mbr_leido.mbr_partition_2.part_fit, datos->FIT, size_destino);
+    strncpy(mbr_leido.mbr_partition_2.part_fit, datos->FIT, 2);
 
     //se indica donde empezara la particion 3
     mbr_leido.mbr_partition_3.part_start = sizeof(Mbr)+mbr_leido.mbr_partition_1.part_size+mbr_leido.mbr_partition_2.part_size+1;
@@ -390,14 +423,18 @@ void par_dos(FILE* f, FDISK* datos, Mbr mbr_leido){
 
     printf("*****Termiando de agregar datos\n.\n.\n");
 
-    //se guardan los cambios
-    fwrite(&mbr_leido, sizeof(Mbr), 1, f);
     printf("*****RESUMEN DE DATOS INGRESADOS EN LA PARTICION 2:\n");
     printf("-Tipo de particion: %c\n", mbr_leido.mbr_partition_2.part_type);
     printf("-Ajuste de particion (FIT): %s\n", mbr_leido.mbr_partition_2.part_fit);
     printf("-Tamaño asignado: %i en %c\n", datos->SIZE, datos->UNIT);
     printf("-Inicio de particion: %i en bytes\n", mbr_leido.mbr_partition_2.part_start);
-    printf("-Nombre asignado: %s\n\n", mbr_leido.mbr_partition_2.part_name);
+    printf("-Nombre asignado: %s\n", mbr_leido.mbr_partition_2.part_name);
+    int tam_total_disco = mbr_leido.mbr_tamano;
+    int restante = tam_total_disco-(sizeof(Mbr)+mbr_leido.mbr_partition_1.part_size+mbr_leido.mbr_partition_2.part_size);
+    printf("-Espacio restante: %i\n\n", restante);
+
+    //se guardan los cambios
+    fwrite(&mbr_leido, sizeof(Mbr), 1, f);
 }
 
 void par_tres(FILE* f, FDISK* datos, Mbr mbr_leido){
@@ -409,11 +446,10 @@ void par_tres(FILE* f, FDISK* datos, Mbr mbr_leido){
 
     mbr_leido.mbr_partition_3.part_type = datos->TYPE;
 
-    size_t size_destino = sizeof(mbr_leido.mbr_partition_3.part_fit);
-    strncpy(mbr_leido.mbr_partition_3.part_fit, datos->FIT, size_destino);
+    strncpy(mbr_leido.mbr_partition_3.part_fit, datos->FIT, 2);
 
     //se indica donde empezara la particion 4
-    mbr_leido.mbr_partition_3.part_start = sizeof(Mbr)+mbr_leido.mbr_partition_1.part_size+mbr_leido.mbr_partition_2.part_size+mbr_leido.mbr_partition_3.part_size+1;
+    mbr_leido.mbr_partition_4.part_start = sizeof(Mbr)+mbr_leido.mbr_partition_1.part_size+mbr_leido.mbr_partition_2.part_size+mbr_leido.mbr_partition_3.part_size+1;
 
     mbr_leido.mbr_partition_3.part_size = tam_total(datos);
 
@@ -421,17 +457,21 @@ void par_tres(FILE* f, FDISK* datos, Mbr mbr_leido){
 
     printf("*****Termiando de agregar datos\n.\n.\n");
 
-    //se guardan los cambios
-    fwrite(&mbr_leido, sizeof(Mbr), 1, f);
     printf("*****RESUMEN DE DATOS INGRESADOS EN LA PARTICION 3:\n");
     printf("-Tipo de particion: %c\n", mbr_leido.mbr_partition_3.part_type);
     printf("-Ajuste de particion (FIT): %s\n", mbr_leido.mbr_partition_3.part_fit);
     printf("-Tamaño asignado: %i en %c\n", datos->SIZE, datos->UNIT);
     printf("-Inicio de particion: %i en bytes\n", mbr_leido.mbr_partition_3.part_start);
-    printf("-Nombre asignado: %s\n\n", mbr_leido.mbr_partition_3.part_name);
+    printf("-Nombre asignado: %s\n", mbr_leido.mbr_partition_3.part_name);
+    int tam_total_disco = mbr_leido.mbr_tamano;
+    int restante = tam_total_disco-(sizeof(Mbr)+mbr_leido.mbr_partition_1.part_size+mbr_leido.mbr_partition_2.part_size+mbr_leido.mbr_partition_3.part_size);
+    printf("-Espacio restante: %i\n\n", restante);
+
+    //se guardan los cambios
+    fwrite(&mbr_leido, sizeof(Mbr), 1, f);
 }
 
-void par_cuatro(FILE* f, FDISK* datos, Mbr mbr_leido){
+void par_cuatro(FILE* f, FDISK* datos, Mbr mbr_leido, int restante){
     printf("*****Ingresando en la Particion 4*****\n");
     fseek(f, 0, SEEK_SET);
 
@@ -440,23 +480,24 @@ void par_cuatro(FILE* f, FDISK* datos, Mbr mbr_leido){
 
     mbr_leido.mbr_partition_4.part_type = datos->TYPE;
 
-    size_t size_destino = sizeof(mbr_leido.mbr_partition_4.part_fit);
-    strncpy(mbr_leido.mbr_partition_4.part_fit, datos->FIT, size_destino);
+    strncpy(mbr_leido.mbr_partition_4.part_fit, datos->FIT, 2);
 
-    mbr_leido.mbr_partition_4.part_size = tam_total(datos);
+    mbr_leido.mbr_partition_4.part_size = restante;//se le asigna lo que queda del espacio del disco
 
     strcpy(mbr_leido.mbr_partition_4.part_name, datos->NAME);
 
     printf("*****Termiando de agregar datos\n.\n.\n");
 
-    //se guardan los cambios
-    fwrite(&mbr_leido, sizeof(Mbr), 1, f);
     printf("*****RESUMEN DE DATOS INGRESADOS EN LA PARTICION 4:\n");
     printf("-Tipo de particion: %c\n", mbr_leido.mbr_partition_4.part_type);
     printf("-Ajuste de particion (FIT): %s\n", mbr_leido.mbr_partition_4.part_fit);
-    printf("-Tamaño asignado: %i en %c\n", datos->SIZE, datos->UNIT);
+    printf("-Tamaño asignado: %i en bytes\n", restante);
     printf("-Inicio de particion: %i en bytes\n", mbr_leido.mbr_partition_4.part_start);
-    printf("-Nombre asignado: %s\n\n", mbr_leido.mbr_partition_4.part_name);
+    printf("-Nombre asignado: %s\n", mbr_leido.mbr_partition_4.part_name);
+    printf("-Espacio restante: 0 bytes\n\n");
+
+    //se guardan los cambios
+    //fwrite(&mbr_leido, sizeof(Mbr), 1, f);
 }
 
 int tam_total(FDISK* datos){

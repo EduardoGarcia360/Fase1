@@ -24,10 +24,10 @@ struct Particion{
 
 struct EBR{
     char part_status;
-    char part_fit;
+    int part_next;
+    char part_fit[2];
     int part_start;
     int part_size;
-    int part_next;
     char part_name[16];
 };
 
@@ -36,10 +36,16 @@ struct Mbr{
     int mbr_tamano;
     time_t mbr_fecha_creacion;
     int mbr_disk_signature;
+    //para primarias y extendidas
     Particion mbr_partition_1;
     Particion mbr_partition_2;
     Particion mbr_partition_3;
     Particion mbr_partition_4;
+    //para logicas dentro de extendidas
+    EBR ebr_particion_1;
+    EBR ebr_particion_2;
+    EBR ebr_particion_3;
+    EBR ebr_particion_4;
 };
 
 struct FDISK{
