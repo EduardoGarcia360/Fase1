@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int cima=0;
+int top=0;
 
 EBR* crearParticion(char status, char fit, int start, int size, int next, char name[16]){
     EBR* par_ext = (EBR*)malloc(sizeof(EBR));
@@ -18,7 +18,7 @@ EBR* crearParticion(char status, char fit, int start, int size, int next, char n
 
 void agregarParticionEX(Lista_EBR* lista, char status, char fit, int start, int size, int next, char name[16]){
     EBR* nuevo = crearParticion(status, fit, start, size, next, name);
-    if(cima==1){
+    if(top==1){
         EBR* aux = lista->inicio;
         while(aux->siguiente != NULL){
             aux = aux->siguiente;
@@ -26,7 +26,7 @@ void agregarParticionEX(Lista_EBR* lista, char status, char fit, int start, int 
         aux->siguiente = nuevo;
     }else{
         lista->inicio = nuevo;
-        cima=1;
+        top=1;
     }
 }
 

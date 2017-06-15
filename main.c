@@ -21,7 +21,8 @@ void menu_general(){
             break;
 
         analizador_general(entrada);
-        entrada=limpiar();
+        //entrada=limpiar();
+        char* entrada = malloc(200);
     }while(strcasecmp("salir\n", entrada) != 0);
     free(entrada);
 }

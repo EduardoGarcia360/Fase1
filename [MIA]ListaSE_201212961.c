@@ -27,6 +27,21 @@ void addFinal(Lista* lista, int categoria, char* comando, char* sentencia){
 	}
 }
 
+void limpiar_lista(Lista* lalista){
+    int cont=0;
+    while(cont != 1){
+        NodoL* aux = lalista->inicio;
+        if(aux->siguiente == NULL){
+            cont = 1;
+            free(aux);
+            cima=0;
+        }else{
+            lalista->inicio = aux->siguiente;
+            free(aux);
+        }
+    }
+}
+
 void showLista(Lista* lista){
     NodoL* actual = lista->inicio;
 	int contador=0;

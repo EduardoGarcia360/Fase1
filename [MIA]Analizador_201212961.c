@@ -3,7 +3,7 @@
 #include "[MIA]MKDISK_201212961.h"
 #include "[MIA]RMDISK_201212961.h"
 #include "[MIA]FDISK_201212961.h"
-#include "[MIA]MKFILE_201212961.h"
+#include "[MIA]MOUNT_201212961.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -163,8 +163,8 @@ void analizador_general(char* entrada){
             proceso_rmdisk(mi_lista);
         }else if(strcmp("fdisk", tipo)==0){
             proceso_fdisk(mi_lista);
-        }else if(strcmp("mkfile", tipo)==0){
-            proceso_mkfile(mi_lista);
+        }else if(strcmp("mount", tipo)==0){
+            proceso_mount(mi_lista);
         }else{
             printf("Error:\n");
             printf("Tipo desconocido, verifique si pertenece a uno de estos comandos:\n");
@@ -172,7 +172,10 @@ void analizador_general(char* entrada){
         }
         break;
     }
-
+    //printf("=====================\n");
+    limpiar_lista(mi_lista);
+    //printf("=====================\n");
+    //showLista(mi_lista);
 }
 
 char* concat(char* destino, char* letra){

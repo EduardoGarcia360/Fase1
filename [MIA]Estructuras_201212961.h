@@ -2,17 +2,11 @@
 #define MIAESTRUCTURAS_201212961_H
 #include <time.h>
 
-typedef struct Sdisco Sdisco;
 typedef struct Mbr Mbr;
 typedef struct Particion Particion;
 typedef struct EBR EBR;
 typedef struct Lista_EBR Lista_EBR;
 typedef struct FDISK FDISK;
-
-struct Sdisco{
-    char nombre[20];
-    char tamano[5];
-};
 
 struct Particion{
     char part_status;
