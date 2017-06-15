@@ -18,7 +18,8 @@ void par_uno(FILE* f, FDISK* datos, Mbr mbr_leido);
 void par_dos(FILE* f, FDISK* datos, Mbr mbr_leido);
 void par_tres(FILE* f, FDISK* datos, Mbr mbr_leido);
 void par_cuatro(FILE* f, FDISK* datos, Mbr mbr_leido, int restante);
-void asignar_primaria_extendida(FILE* f, FDISK* datos, Mbr mbr_leido);
+void asignar_primaria(FILE* f, FDISK* datos, Mbr mbr_leido);
+void asignar_extendida(FILE* f, FDISK* datos, Mbr mbr_leido);
 void asignar_logica(FILE* f, FDISK* datos, Mbr mbr_leido);
 int tam_total(FDISK* datos);
 
@@ -298,6 +299,7 @@ int fvalidar_ruta(char* ruta){
 
 void crear_particion(FDISK* datos){
     Mbr mbr_leido;
+    int extendida_activa=0;
     FILE* f = fopen(datos->PATH,"r+b");
     if(f!=NULL){
         fseek(f, 0, SEEK_SET);//nos posicionamos al inicio del archivo
@@ -305,8 +307,10 @@ void crear_particion(FDISK* datos){
 
         int tam_ingresado=tam_total(datos);//retorna el tamaño en bytes
         if(tam_ingresado < mbr_leido.mbr_tamano){
-            if(datos->TYPE=='p' || datos->TYPE=='e'){
-                asignar_primaria_extendida(f, datos, mbr_leido);
+            if(datos->TYPE=='p'){
+                asignar_primaria(f, datos, mbr_leido);
+            }else if(datos->TYPE=='e'){
+                asignar_extendida(f, datos, mbr_leido);
             }else if(datos->TYPE=='l'){
                 asignar_logica(f, datos, mbr_leido);
             }
@@ -325,47 +329,53 @@ void crear_particion(FDISK* datos){
     }
 }
 
-void asignar_primaria_extendida(FILE* f, FDISK* datos, Mbr mbr_leido){
-    if(mbr_leido.mbr_partition_1.part_size==0){//la particion aun no tiene tamaño
+/* para particiones de tipo primaria */
+void asignar_primaria(FILE* f, FDISK* datos, Mbr mbr_leido){
+    if(mbr_leido.mbr_partition_1.part_size==0){
         par_uno(f, datos, mbr_leido);
     }else if(mbr_leido.mbr_partition_2.part_size==0){
-        par_dos(f, datos, mbr_leido);
-    }else if(mbr_leido.mbr_partition_3.part_size==0){
-        par_tres(f, datos, mbr_leido);
-    }else if(mbr_leido.mbr_partition_4.part_size==0){
-        /*se calcula el tamaño exacto que resta para la particion 4*/
-        int tam_total_disco = mbr_leido.mbr_tamano;
-        int restante = tam_total_disco-(sizeof(Mbr)+mbr_leido.mbr_partition_1.part_size+mbr_leido.mbr_partition_2.part_size+mbr_leido.mbr_partition_3.part_size);
-
-        int ingresado = tam_total(datos);//cantidad ingresada por el usuario para esta particion
-        int mega = 1024*1024;//un megabyte
-
-        if((ingresado-restante)<mega){
-            /*si lo ingresado menos lo que queda es menor a un 1MB*/
-            par_cuatro(f, datos, mbr_leido, restante);
-        }else{
-            /*si lo ingresado menos lo que queda es mayor a un 1MB*/
+        if(strcmp(mbr_leido.mbr_partition_1.part_name, datos->NAME)==0){
             printf("\n\nError:\n");
-            printf("El tamaño ingresado para la particion 4 sobrepasa lo restante en el disco\n");
-            printf("Espacio restante en disco: %i en bytes\n", restante);
+            printf("El nombre: %s que trata de asignar ya existe en otra particion.\n", datos->NAME);
+        }else{
+            if(strcmp(mbr_leido.mbr_partition_2.part_type, "e")==0 || strcmp(mbr_leido.mbr_partition_3.part_type, "e")==0 || strcmp(mbr_leido.mbr_partition_4.part_type, "e")==0){
+                printf("\n\nError:\n");
+                printf("Ya existe una particion Extendia! no puede crear otra.\n");
+            }else{
+                par_dos(f, datos, mbr_leido);
+            }
+        }
+    }else if(mbr_leido.mbr_partition_3.part_size==0){
+        if(strcmp(mbr_leido.mbr_partition_1.part_name, datos->NAME)==0 || strcmp(mbr_leido.mbr_partition_2.part_name, datos->NAME)==0){
+            printf("\n\nError:\n");
+            printf("El nombre: %s que trata de asignar ya existe en otra particion.\n", datos->NAME);
+        }else{
+            par_tres(f, datos, mbr_leido);
+        }
+    }else if(mbr_leido.mbr_partition_4.part_size==0){
+        if(strcmp(mbr_leido.mbr_partition_1.part_name, datos->NAME)==0 || strcmp(mbr_leido.mbr_partition_2.part_name, datos->NAME)==0 || strcmp(mbr_leido.mbr_partition_3.part_name, datos->NAME)==0){
+            printf("\n\nError:\n");
+            printf("El nombre: %s que trata de asignar ya existe en otra particion.\n", datos->NAME);
+        }else{
+            /*se calcula el tamaño exacto que resta para la particion 4*/
+            int tam_total_disco = mbr_leido.mbr_tamano;
+            int restante = tam_total_disco-(sizeof(Mbr)+mbr_leido.mbr_partition_1.part_size+mbr_leido.mbr_partition_2.part_size+mbr_leido.mbr_partition_3.part_size);
+
+            int ingresado = tam_total(datos);//cantidad ingresada por el usuario para esta particion
+            int mega = 1024*1024;//un megabyte
+
+            if((ingresado-restante)<mega){
+                /*si lo ingresado difiere en menos de un 1MB*/
+                par_cuatro(f, datos, mbr_leido, restante);
+            }else{
+                /*si al hacer la resta el resultado es mayor a 1MB*/
+                printf("\n\nError:\n");
+                printf("El tamaño ingresado para la particion 4 sobrepasa lo restante en el disco\n");
+                printf("Espacio restante en disco: %i en bytes\n", restante);
+            }
         }
     }else{
-        printf("Las cuatro particiones ya no estan disponibles.\nCree otro disco o borre una particion.\n");
-    }
-}
-
-void asignar_logica(FILE* f, FDISK* datos, Mbr mbr_leido){
-    if(mbr_leido.mbr_partition_1.part_type=='e'){
-        //algo xdxd
-    }else if(mbr_leido.mbr_partition_1.part_type=='e'){
-        //algo xdxd
-    }else if(mbr_leido.mbr_partition_1.part_type=='e'){
-        //algo xdxd
-    }else if(mbr_leido.mbr_partition_1.part_type=='e'){
-        //algo xdxd
-    }else{
-        printf("\n\nError:\n");
-        printf("No existen particiones de tipo Extendida en la que se pueda crear una particion Logica.\n");
+        printf("Las cuatro particiones ya estan llenas.\nCree otro disco o borre una particion.\n");
     }
 }
 
@@ -482,7 +492,7 @@ void par_cuatro(FILE* f, FDISK* datos, Mbr mbr_leido, int restante){
 
     strncpy(mbr_leido.mbr_partition_4.part_fit, datos->FIT, 2);
 
-    mbr_leido.mbr_partition_4.part_size = restante;//se le asigna lo que queda del espacio del disco
+    mbr_leido.mbr_partition_4.part_size = tam_total(datos);
 
     strcpy(mbr_leido.mbr_partition_4.part_name, datos->NAME);
 
@@ -494,10 +504,45 @@ void par_cuatro(FILE* f, FDISK* datos, Mbr mbr_leido, int restante){
     printf("-Tamaño asignado: %i en bytes\n", restante);
     printf("-Inicio de particion: %i en bytes\n", mbr_leido.mbr_partition_4.part_start);
     printf("-Nombre asignado: %s\n", mbr_leido.mbr_partition_4.part_name);
-    printf("-Espacio restante: 0 bytes\n\n");
+    int restante_p4 = restante - mbr_leido.mbr_partition_4.part_size;
+    printf("-Espacio restante para asignar a la particion 4: %i\n\n", restante_p4);
 
     //se guardan los cambios
-    //fwrite(&mbr_leido, sizeof(Mbr), 1, f);
+    fwrite(&mbr_leido, sizeof(Mbr), 1, f);
+}
+
+/* para particiones de tipo extendida */
+void asignar_extendida(FILE* f, FDISK* datos, Mbr mbr_leido){
+    /*primero valido si alguna de las 4 particiones ya tiene el tipo extendida*/
+    if(strcmp(mbr_leido.mbr_partition_1.part_type, datos->TYPE)==0 || strcmp(mbr_leido.mbr_partition_2.part_type, datos->TYPE)==0 || strcmp(mbr_leido.mbr_partition_3.part_type, datos->TYPE)==0 || strcmp(mbr_leido.mbr_partition_4.part_type, datos->TYPE)==0){
+        printf("\n\nError:\n");
+        printf("Ya existe una particion con el tipo Extendida,\nno puede haber mas de 1 particion de tipo extendida.\n");
+    }else{
+        if(mbr_leido.mbr_partition_1.part_size==0){
+        }else if(mbr_leido.mbr_partition_2.part_size==0){
+        }else if(mbr_leido.mbr_partition_3.part_size==0){
+        }else if(mbr_leido.mbr_partition_4.part_size==0){
+        }else{
+            printf("\n\nError:\n");
+            printf("Las cuatro particiones ya estan llenas.\nCree otro disco o borre una particion.\n");
+        }
+    }
+}
+
+/* para particiones de tipo logica */
+void asignar_logica(FILE* f, FDISK* datos, Mbr mbr_leido){
+    if(mbr_leido.mbr_partition_1.part_type=='e'){
+        //algo xdxd
+    }else if(mbr_leido.mbr_partition_1.part_type=='e'){
+        //algo xdxd
+    }else if(mbr_leido.mbr_partition_1.part_type=='e'){
+        //algo xdxd
+    }else if(mbr_leido.mbr_partition_1.part_type=='e'){
+        //algo xdxd
+    }else{
+        printf("\n\nError:\n");
+        printf("No existen particiones de tipo Extendida en la que se pueda crear una particion Logica.\n");
+    }
 }
 
 int tam_total(FDISK* datos){

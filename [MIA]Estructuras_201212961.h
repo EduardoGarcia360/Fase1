@@ -6,6 +6,7 @@ typedef struct Sdisco Sdisco;
 typedef struct Mbr Mbr;
 typedef struct Particion Particion;
 typedef struct EBR EBR;
+typedef struct Lista_EBR Lista_EBR;
 typedef struct FDISK FDISK;
 
 struct Sdisco{
@@ -29,6 +30,11 @@ struct EBR{
     int part_start;
     int part_size;
     char part_name[16];
+    EBR* siguiente;
+};
+
+struct Lista_EBR{
+    EBR* inicio;
 };
 
 //usado en mkdisk
@@ -61,4 +67,6 @@ struct FDISK{
     int ADD;
     int MOV; //aun no se que es
 };
+
+void agregarParticionEX(Lista_EBR* lalista, char status, char fit, int start, int size, int next, char name[16]);
 #endif // [MIA]ESTRUCTURAS_201212961_H

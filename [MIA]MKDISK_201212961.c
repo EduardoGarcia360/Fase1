@@ -337,6 +337,12 @@ void agregar_MBR(char* ruta, int tam){
     nuevo->mbr_partition_4.part_size=0;
     strcpy(nuevo->mbr_partition_4.part_name,"");
 
+    /*valores para la particion de tipo extendida*/
+    nuevo->ebr_particion_1.part_size=0;
+    nuevo->ebr_particion_2.part_size=0;
+    nuevo->ebr_particion_3.part_size=0;
+    nuevo->ebr_particion_4.part_size=0;
+
     FILE* f=fopen(ruta,"r+b");
     if(f!=NULL){
         fseek(f,0, SEEK_SET);

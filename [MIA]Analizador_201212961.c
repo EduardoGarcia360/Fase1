@@ -12,15 +12,18 @@
 char* concat(char* destino, char* letra);// metodo para concatenar
 char* limpiar();
 
-/*
-primera parte del analisis encargada de verficar si pertenece a mkdisk, rmdisk, etc
-*/
-void analizador_general(){
+void analizador_general(char* entrada){
     Lista* mi_lista = (Lista*)malloc(sizeof(Lista));
+
     char linea[200];
+    strcpy(linea, entrada);
+    /*
     printf("Introduce linea de comando. (max. 200 caracteres):\n");
     scanf("%[^\n]s", &linea);
+    */
     //printf("la linea es: %s\n", linea);
+
+
 
     int pos=0, estado=0, correcto=0;
     char* tipo="";
@@ -92,7 +95,7 @@ void analizador_general(){
             if(isspace(caracter) && linea[pos+1]=='$' || isspace(caracter) && linea[pos+1]=='@'){
                 //cuando encuentra un espacio indica que termino la sentencia o cuando termina la linea
                 //ej. 1: mkdisk $size=>32 $path...
-                //ej. 2: mkdisk $size=>32
+                //ej. 2: mkdisk $size=>32 @algo...
                 sentencia=concat(sentencia, lexema);
                 //printf("--sentencia: %s\n\n", sentencia);
                 correcto=1;
@@ -101,7 +104,7 @@ void analizador_general(){
                 comando=limpiar();
                 sentencia=limpiar();
                 estado=1;
-            }else if(linea[pos+1]==NULL){
+            }else if(linea[pos+1]==NULL || linea[pos+1]=='\n'){
                 //entra en esta parte cuando es el final de linea se concatena ya que estamos en el ultimo caracter
                 //ej. 1: mkdisk $size=>32 en este caso seria 2.
                 caracter=tolower(caracter);
@@ -169,7 +172,7 @@ void analizador_general(){
         }
         break;
     }
-    return;
+
 }
 
 char* concat(char* destino, char* letra){
