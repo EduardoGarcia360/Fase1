@@ -28,7 +28,7 @@ struct NodoM{
     char* DISK;
     char LETRA;
     int numero;
-    char* ID;
+    char ID[5];
     NodoM* siguiente;
 };
 
@@ -39,6 +39,7 @@ struct TMP{
 
 struct ListaM{
     NodoM* inicio;
+    char letra_actual;
 };
 
 /*Analizador*/

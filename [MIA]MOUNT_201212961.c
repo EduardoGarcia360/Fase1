@@ -67,72 +67,17 @@ void proceso_mount(Lista* lalista, ListaM* lalistam){
 
 void generar_id(ListaM* lalistam, char* ruta, char* nombre_particion){
     //se obtiene el nombre del disco
+    showParticionesMontadas(lalistam);
     char* nombre_disco = "";
     nombre_disco = getNombre_disco(ruta);
 
     TMP* datos = (TMP*)malloc(sizeof(TMP));
     datos = ultima_letra(lalistam, nombre_disco, 'a');
 
-    if(datos->LETRA == 'a' && datos->NUMERO == 1 && lalistam->inicio == NULL){
-        //primer dato ingresado en la lista
-        printf("primera asignacion\n");
-        char* id="";
-        id=concat(id, "vd");
-        id=concat(id, &datos->LETRA);
-        char tmp = datos->NUMERO+'0';
-        id=concat(id, &tmp);
-
-        addDisco(lalistam, ruta, nombre_particion, nombre_disco, datos->LETRA, datos->NUMERO, id);
-    }else if(datos->LETRA == 'a' && datos->NUMERO > 1){
-        //nueva particion
-        printf("segunda asignacion\n");
-        int n = datos->NUMERO;
-        n++;
-        char* id="";
-        id=concat(id, "vd");
-        id=concat(id, &datos->LETRA);
-        char tmp = n +'0';
-        id=concat(id, &tmp);
-
-        addDisco(lalistam, ruta, nombre_particion, nombre_disco, datos->LETRA, n, id);
-    }else if(datos->LETRA > 'a' && datos->NUMERO == 1){
-        printf("tercera asignacion\n");
-        //nuevo disco ingresado por ser mayor a 'a' le corresponde la siguiente letra
-        //al hacer lo siguiente avanzamos de letra (ver ejemplo comentado)
-        char le = datos->LETRA;
-         le++;
-        char* id="";
-        id=concat(id, "vd");
-        id=concat(id, &le);
-        char tmp = datos->NUMERO+'0';
-        id=concat(id, &tmp);
-
-        addDisco(lalistam, ruta, nombre_particion, nombre_disco, le, datos->NUMERO, id);
-    }else{
-        printf("cuarta asignacion\n");
-        //disco ya ingresado con distinta particion le corresponde siguiente numero
-        int t = datos->NUMERO;
-        datos->NUMERO = t + 1;
-        char* id="";
-        id=concat(id, "vd");
-        id=concat(id, &datos->LETRA);
-        char tmp = datos->NUMERO+'0';
-        id=concat(id, &tmp);
-
-        addDisco(lalistam, ruta, nombre_particion, nombre_disco, datos->LETRA, datos->NUMERO, id);
-    }
-    /*
-    en caso de no entender el segundo if
-    char letra = 'a';
-    printf("%c\n", letra);
-    letra++;
-    printf("%c\n", letra);
-    letra++;
-    printf("%c\n", letra);
-    letra++;
-    printf("%c\n", letra);
-    */
-    //addDisco(lalistam, ruta, nombre_particion, algo, 'a', 1, "vda1");
+    char id[5];
+    sprintf(id, "vd%c%i", datos->LETRA, datos->NUMERO);
+    printf("id para meter %s\n", &id);
+    addDisco(lalistam, ruta, nombre_particion, nombre_disco, datos->LETRA, datos->NUMERO, id);
     showParticionesMontadas(lalistam);
 }
 

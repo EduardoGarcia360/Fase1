@@ -2,9 +2,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-int cima=0;//Analizar
-int cimamM=0;//Mount
-
 /*para Analizador*/
 void inicializar(Lista* lista){
     lista->inicio=NULL;
@@ -29,7 +26,6 @@ void addFinal(Lista* lista, int categoria, char* comando, char* sentencia){
 		aux->siguiente = nuevo;
 	}else{
 		lista->inicio = nuevo;
-		cima = 1;
 	}
 }
 
@@ -41,7 +37,6 @@ void limpiar_lista(Lista* lalista){
             if(aux->siguiente == NULL){
                 cont = 1;
                 free(aux);
-                cima=0;
             }else{
                 lalista->inicio = aux->siguiente;
                 free(aux);
@@ -73,21 +68,22 @@ void showLista(Lista* lista){
 /*para Mount*/
 void inicializarM(ListaM* lista){
     lista->inicio=NULL;
+    lista->letra_actual='a';
 }
 
-NodoM* crearMount(char* ruta, char* nombre, char* disco, char letra, int num, char* id){
+NodoM* crearMount(char* ruta, char* nombre, char* disco, char letra, int num, char id[]){
     NodoM* nodo = (NodoM*)malloc(sizeof(NodoM));
     nodo->PATH=ruta;
     nodo->NAME_PART=nombre;
     nodo->DISK=disco;
     nodo->LETRA=letra;
     nodo->numero=num;
-    nodo->ID=id;
+    strcpy(nodo->ID, id);
     nodo->siguiente=NULL;
     return nodo;
 }
 
-void addDisco(ListaM* lalista, char* ruta, char* nombrepart, char* disco, char letra, int numero, char* id){
+void addDisco(ListaM* lalista, char* ruta, char* nombrepart, char* disco, char letra, int numero, char id[]){
     NodoM* nuevo = crearMount(ruta, nombrepart, disco, letra, numero, id);
     if (lalista->inicio != NULL){
         NodoM* aux = lalista->inicio;
@@ -97,7 +93,6 @@ void addDisco(ListaM* lalista, char* ruta, char* nombrepart, char* disco, char l
         aux->siguiente=nuevo;
     }else{
         lalista->inicio=nuevo;
-        cimamM=1;
     }
 }
 
@@ -109,7 +104,6 @@ void limpiar_lista_mount(ListaM* lalista){
             if(aux->siguiente==NULL){
                 cont=1;
                 free(aux);
-                cimamM=0;
             }else{
                 lalista->inicio=aux->siguiente;
                 free(aux);
@@ -128,7 +122,7 @@ void showParticionesMontadas(ListaM* lalista){
         printf("Nombre Disco: %s\n", actual->DISK);
         printf("Letra: %c\n", actual->LETRA);
         printf("Numero: %d\n", actual->numero);
-        printf("ID: %s\n", actual->ID);
+        printf("ID: %s\n", &actual->ID);
         printf("============\n");
         contador++;
         actual=actual->siguiente;
@@ -138,11 +132,13 @@ void showParticionesMontadas(ListaM* lalista){
 TMP* ultima_letra(ListaM* lalista, char* nombredisco, char letra){
     TMP* aux = (TMP*)malloc(sizeof(TMP));
     if(lalista->inicio == NULL){
-        aux->LETRA='a';
+        aux->LETRA=lalista->letra_actual;
         aux->NUMERO=1;
     }else{
         NodoM* actual = lalista->inicio;
         int encontrado = 0;
+        char letra_asig;
+        int contador=0;
         while(actual != NULL){
             if(strcmp(nombredisco, actual->DISK)==0){
                 /*
@@ -151,24 +147,20 @@ TMP* ultima_letra(ListaM* lalista, char* nombredisco, char letra){
                 */
                 printf("*************comparo nombres\n");
                 aux->LETRA = actual->LETRA;
-                aux->NUMERO = actual->numero;
+                int tmp = actual->numero;
+                aux->NUMERO = tmp+1;
                 encontrado=1;
-            }else if(actual->LETRA > letra && encontrado==0){
-                /*
-                actual letra tiene 'a' mayor o igual que letra 'a'
-                comparo para encontrar una letra mayor a la 'a' que envio
-                b > a asigno b en aux.
-                */
-                printf("*************comparo letras\n");
-
-                letra = actual->LETRA;
-                aux->LETRA = actual->LETRA;
-                aux->NUMERO = 1;
             }else{
-                printf("*************ultimo\n");
-                letra = actual->LETRA;
-                aux->LETRA = actual->LETRA;
-                aux->NUMERO = actual->numero;
+                if(encontrado==0 && actual->siguiente == NULL){
+                    letra_asig=lalista->letra_actual;
+                    letra_asig++;
+                    lalista->letra_actual=letra_asig;
+                    printf("nueva letra de lista: %c\n", lalista->letra_actual);
+                    aux->LETRA=lalista->letra_actual;
+                    aux->NUMERO=1;
+                }else{
+                    printf("algo\n");
+                }
             }
             actual = actual->siguiente;
         }
