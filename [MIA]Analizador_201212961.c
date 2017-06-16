@@ -12,18 +12,12 @@
 char* concat(char* destino, char* letra);// metodo para concatenar
 char* limpiar();
 
-void analizador_general(char* entrada){
+void analizador_general(char* entrada, ListaM* lalistam){
     Lista* mi_lista = (Lista*)malloc(sizeof(Lista));
+    inicializar(mi_lista);
 
     char linea[200];
     strcpy(linea, entrada);
-    /*
-    printf("Introduce linea de comando. (max. 200 caracteres):\n");
-    scanf("%[^\n]s", &linea);
-    */
-    //printf("la linea es: %s\n", linea);
-
-
 
     int pos=0, estado=0, correcto=0;
     char* tipo="";
@@ -164,7 +158,7 @@ void analizador_general(char* entrada){
         }else if(strcmp("fdisk", tipo)==0){
             proceso_fdisk(mi_lista);
         }else if(strcmp("mount", tipo)==0){
-            proceso_mount(mi_lista);
+            proceso_mount(mi_lista, lalistam);
         }else{
             printf("Error:\n");
             printf("Tipo desconocido, verifique si pertenece a uno de estos comandos:\n");

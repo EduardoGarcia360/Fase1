@@ -5,16 +5,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-void generar_id(char* ruta);
+void generar_id(ListaM* mi_lista, char* ruta, char* nombre_particion);
 char* getNombre_disco(char* ruta);
 
-void proceso_mount(Lista* lalista){
+void proceso_mount(Lista* lalista, ListaM* lalistam){
     NodoL* actual=lalista->inicio;
+
 
     int categoria, resultado;
     int proceso=0, fallo=0;
     char* ruta="";
-    char* nombre="";
+    char* nombre_particion="";
 
     while(actual!=NULL){
         categoria=actual->categoria;
@@ -37,8 +38,7 @@ void proceso_mount(Lista* lalista){
                     fallo=1;
                 }else{
                     proceso++;
-                    nombre=concat(nombre, actual->sentencia);
-                    //strcpy(nombre, actual->sentencia);
+                    nombre_particion=concat(nombre_particion, actual->sentencia);
                 }
             }else{
                 printf("\n\nError:\n");
@@ -58,20 +58,87 @@ void proceso_mount(Lista* lalista){
     }
 
     if(proceso==2){
-        //hacer mount
-        generar_id(ruta);
+        //en este punto ya tengo ruta, nombre de la particion y nombre del disco dentro de la ruta
+        generar_id(lalistam, ruta, nombre_particion);
     }else{
         printf("Proceso para MOUNT fallido.\n");
     }
 }
 
-void generar_id(char* ruta){
-    char* algo = "";
-    algo = getNombre_disco(ruta);
-    printf("nombre limpio: %s\n", algo);
+void generar_id(ListaM* lalistam, char* ruta, char* nombre_particion){
+    //se obtiene el nombre del disco
+    char* nombre_disco = "";
+    nombre_disco = getNombre_disco(ruta);
+
+    TMP* datos = (TMP*)malloc(sizeof(TMP));
+    datos = ultima_letra(lalistam, nombre_disco, 'a');
+
+    if(datos->LETRA == 'a' && datos->NUMERO == 1 && lalistam->inicio == NULL){
+        //primer dato ingresado en la lista
+        printf("primera asignacion\n");
+        char* id="";
+        id=concat(id, "vd");
+        id=concat(id, &datos->LETRA);
+        char tmp = datos->NUMERO+'0';
+        id=concat(id, &tmp);
+
+        addDisco(lalistam, ruta, nombre_particion, nombre_disco, datos->LETRA, datos->NUMERO, id);
+    }else if(datos->LETRA == 'a' && datos->NUMERO > 1){
+        //nueva particion
+        printf("segunda asignacion\n");
+        int n = datos->NUMERO;
+        n++;
+        char* id="";
+        id=concat(id, "vd");
+        id=concat(id, &datos->LETRA);
+        char tmp = n +'0';
+        id=concat(id, &tmp);
+
+        addDisco(lalistam, ruta, nombre_particion, nombre_disco, datos->LETRA, n, id);
+    }else if(datos->LETRA > 'a' && datos->NUMERO == 1){
+        printf("tercera asignacion\n");
+        //nuevo disco ingresado por ser mayor a 'a' le corresponde la siguiente letra
+        //al hacer lo siguiente avanzamos de letra (ver ejemplo comentado)
+        char le = datos->LETRA;
+         le++;
+        char* id="";
+        id=concat(id, "vd");
+        id=concat(id, &le);
+        char tmp = datos->NUMERO+'0';
+        id=concat(id, &tmp);
+
+        addDisco(lalistam, ruta, nombre_particion, nombre_disco, le, datos->NUMERO, id);
+    }else{
+        printf("cuarta asignacion\n");
+        //disco ya ingresado con distinta particion le corresponde siguiente numero
+        int t = datos->NUMERO;
+        datos->NUMERO = t + 1;
+        char* id="";
+        id=concat(id, "vd");
+        id=concat(id, &datos->LETRA);
+        char tmp = datos->NUMERO+'0';
+        id=concat(id, &tmp);
+
+        addDisco(lalistam, ruta, nombre_particion, nombre_disco, datos->LETRA, datos->NUMERO, id);
+    }
+    /*
+    en caso de no entender el segundo if
+    char letra = 'a';
+    printf("%c\n", letra);
+    letra++;
+    printf("%c\n", letra);
+    letra++;
+    printf("%c\n", letra);
+    letra++;
+    printf("%c\n", letra);
+    */
+    //addDisco(lalistam, ruta, nombre_particion, algo, 'a', 1, "vda1");
+    showParticionesMontadas(lalistam);
 }
 
 char* getNombre_disco(char* ruta){
+    //recibe: /home/tugfa/elsad.dsk
+    //retorna: elsad
     char aRuta[100];
     strcpy(aRuta, ruta);
     int pos=0, estado=0;

@@ -1,4 +1,5 @@
 #include "[MIA]Analizador_201212961.h"
+#include "[MIA]ListaSE_201212961.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -12,6 +13,8 @@ int main()
 
 void menu_general(){
     char* entrada = malloc(200);
+    ListaM* mi_lista = (ListaM*)malloc(sizeof(ListaM));
+    inicializarM(mi_lista);
     do{
 
         printf("*Introduce linea de comando. (max. 200 caracteres):\n");
@@ -19,10 +22,8 @@ void menu_general(){
         fgets(entrada, 200, stdin);
         if(strcasecmp(entrada, "salir\n")==0)
             break;
+        analizador_general(entrada, mi_lista);
 
-        analizador_general(entrada);
-        //entrada=limpiar();
-        char* entrada = malloc(200);
     }while(strcasecmp("salir\n", entrada) != 0);
     free(entrada);
 }
