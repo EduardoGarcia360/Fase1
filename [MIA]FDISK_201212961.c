@@ -338,12 +338,7 @@ void asignar_primaria(FILE* f, FDISK* datos, Mbr mbr_leido){
             printf("\n\nError:\n");
             printf("El nombre: %s que trata de asignar ya existe en otra particion.\n", datos->NAME);
         }else{
-            if(strcmp(mbr_leido.mbr_partition_2.part_type, "e")==0 || strcmp(mbr_leido.mbr_partition_3.part_type, "e")==0 || strcmp(mbr_leido.mbr_partition_4.part_type, "e")==0){
-                printf("\n\nError:\n");
-                printf("Ya existe una particion Extendia! no puede crear otra.\n");
-            }else{
-                par_dos(f, datos, mbr_leido);
-            }
+            par_dos(f, datos, mbr_leido);
         }
     }else if(mbr_leido.mbr_partition_3.part_size==0){
         if(strcmp(mbr_leido.mbr_partition_1.part_name, datos->NAME)==0 || strcmp(mbr_leido.mbr_partition_2.part_name, datos->NAME)==0){
@@ -388,7 +383,8 @@ void par_uno(FILE* f, FDISK* datos, Mbr mbr_leido){
 
     mbr_leido.mbr_partition_1.part_type = datos->TYPE;
 
-    strncpy(mbr_leido.mbr_partition_1.part_fit, datos->FIT, 2);
+    strcpy(mbr_leido.mbr_partition_1.part_fit, datos->FIT);
+    //strncpy(mbr_leido.mbr_partition_1.part_fit, datos->FIT, 2);
 
     mbr_leido.mbr_partition_1.part_size = tam_total(datos);//en bytes
 
@@ -422,7 +418,8 @@ void par_dos(FILE* f, FDISK* datos, Mbr mbr_leido){
 
     mbr_leido.mbr_partition_2.part_type = datos->TYPE;
 
-    strncpy(mbr_leido.mbr_partition_2.part_fit, datos->FIT, 2);
+    strcpy(mbr_leido.mbr_partition_2.part_fit, datos->FIT);
+    //strncpy(mbr_leido.mbr_partition_2.part_fit, datos->FIT, 2);
 
     //se indica donde empezara la particion 3
     mbr_leido.mbr_partition_3.part_start = sizeof(Mbr)+mbr_leido.mbr_partition_1.part_size+mbr_leido.mbr_partition_2.part_size+1;
@@ -456,7 +453,8 @@ void par_tres(FILE* f, FDISK* datos, Mbr mbr_leido){
 
     mbr_leido.mbr_partition_3.part_type = datos->TYPE;
 
-    strncpy(mbr_leido.mbr_partition_3.part_fit, datos->FIT, 2);
+    strcpy(mbr_leido.mbr_partition_3.part_fit, datos->FIT);
+    //strncpy(mbr_leido.mbr_partition_3.part_fit, datos->FIT, 2);
 
     //se indica donde empezara la particion 4
     mbr_leido.mbr_partition_4.part_start = sizeof(Mbr)+mbr_leido.mbr_partition_1.part_size+mbr_leido.mbr_partition_2.part_size+mbr_leido.mbr_partition_3.part_size+1;

@@ -38,6 +38,8 @@ void analizador_general(char* entrada, ListaM* lalistam){
                 //printf("--tipo: %s\n\n", tipo);
                 lexema=limpiar();
                 estado=1;
+                if(linea[pos+1]==NULL)
+                    correcto=1;//para validar que solo se ingreso mount
             }else if(islower(caracter)||isupper(caracter)){
                 caracter=tolower(caracter);
                 lexema=concat(lexema, &caracter);

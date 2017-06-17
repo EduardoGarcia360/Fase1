@@ -54,6 +54,6 @@ void inicializarM(ListaM* lista);
 void addDisco(ListaM* lista, char* ruta, char* nombrepart, char* disco, char letra, int numero, char* id);
 void showParticionesMontadas(ListaM* lalista);
 void limpiar_lista_mount(ListaM* lalista);
-TMP* ultima_letra(ListaM* lalista, char* nombredisco, char letra);
+TMP* letra_numero(ListaM* lalista, char* nombredisco);
 
 #endif // [MIA]LISTASE_201212961_H

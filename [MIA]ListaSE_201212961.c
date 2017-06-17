@@ -63,7 +63,6 @@ void showLista(Lista* lista){
 		actual = actual->siguiente;
 	}
 }
-/*fin metodos para la lista usada en Analizador*/
 
 /*para Mount*/
 void inicializarM(ListaM* lista){
@@ -113,71 +112,68 @@ void limpiar_lista_mount(ListaM* lalista){
 }
 
 void showParticionesMontadas(ListaM* lalista){
-    NodoM* actual = lalista->inicio;
-    int contador=0;
-    while(actual != NULL){
-        printf("Disco #%d\n", contador);
-        printf("Ruta: %s\n", actual->PATH);
-        printf("Nombre Particion: %s\n", actual->NAME_PART);
-        printf("Nombre Disco: %s\n", actual->DISK);
-        printf("Letra: %c\n", actual->LETRA);
-        printf("Numero: %d\n", actual->numero);
-        printf("ID: %s\n", &actual->ID);
-        printf("============\n");
-        contador++;
-        actual=actual->siguiente;
+    if(lalista->inicio == NULL){
+        printf("Aun no hay discos montados.\n");
+    }else{
+        NodoM* actual = lalista->inicio;
+        int contador=1;
+        while(actual != NULL){
+            printf("Disco #%d\n", contador);
+            printf("Ruta:             %s\n", actual->PATH);
+            printf("Nombre Particion: %s\n", actual->NAME_PART);
+            printf("Nombre Disco:     %s\n", actual->DISK);
+            printf("Letra:            %c\n", actual->LETRA);
+            printf("Numero:           %d\n", actual->numero);
+            printf("ID:               %s\n", &actual->ID);
+            printf("=======================\n");
+            contador++;
+            actual=actual->siguiente;
+        }
     }
 }
 
-TMP* ultima_letra(ListaM* lalista, char* nombredisco, char letra){
+TMP* letra_numero(ListaM* lalista, char* nombredisco){
+    /*se busca dentro de la lista de particiones*/
     TMP* aux = (TMP*)malloc(sizeof(TMP));
+
     if(lalista->inicio == NULL){
         aux->LETRA=lalista->letra_actual;
         aux->NUMERO=1;
     }else{
         NodoM* actual = lalista->inicio;
         int encontrado = 0;
-        char letra_asig;
-        int contador=0;
+
         while(actual != NULL){
             if(strcmp(nombredisco, actual->DISK)==0){
                 /*
-                -si ya existe un disco con el nombre ingresado se asignan
-                la LETRA y NUMERO que corresponden al mismo disco.
+                -si ya existe un disco se asigna la misma letra
+                -se incrementa la cantidad del disco encontrado
                 */
-                printf("*************comparo nombres\n");
                 aux->LETRA = actual->LETRA;
+
                 int tmp = actual->numero;
                 aux->NUMERO = tmp+1;
                 encontrado=1;
-            }else{
-                if(encontrado==0 && actual->siguiente == NULL){
-                    letra_asig=lalista->letra_actual;
-                    letra_asig++;
-                    lalista->letra_actual=letra_asig;
-                    printf("nueva letra de lista: %c\n", lalista->letra_actual);
-                    aux->LETRA=lalista->letra_actual;
-                    aux->NUMERO=1;
-                }else{
-                    printf("algo\n");
-                }
+            }else if(encontrado==0 && actual->siguiente == NULL){
+                /*
+                -no encontro ningun disco con el nombre ingresado
+                -y ademas llego al final entonces se incrementa la
+                -letra que se inicializo en MAIN posteriormente se
+                -sustituye la nueva letra por la anterior.
+                */
+                char letra_asig;
+                letra_asig=lalista->letra_actual;
+                letra_asig++;
+                lalista->letra_actual=letra_asig;
+
+                aux->LETRA=lalista->letra_actual;
+                aux->NUMERO=1;
             }
             actual = actual->siguiente;
         }
     }
     return aux;
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 
