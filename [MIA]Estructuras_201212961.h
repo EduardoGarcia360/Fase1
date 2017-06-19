@@ -59,7 +59,7 @@ struct FDISK{
     char FIT[2];//(para dos o mas se utiliza array)
     char _DELETE;
     int ADD;
-    int MOV; //aun no se que es
+    int MOV;
 };
 
 void agregarParticionEX(Lista_EBR* lalista, char status, char fit, int start, int size, int next, char name[16]);

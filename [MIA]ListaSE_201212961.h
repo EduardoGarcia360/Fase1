@@ -56,4 +56,7 @@ void showParticionesMontadas(ListaM* lalista);
 void limpiar_lista_mount(ListaM* lalista);
 TMP* letra_numero(ListaM* lalista, char* nombredisco);
 
+/*REPORTE*/
+int buscar_id(ListaM* lalista, char* buscado);
+
 #endif // [MIA]LISTASE_201212961_H

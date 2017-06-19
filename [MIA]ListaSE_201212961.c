@@ -175,6 +175,39 @@ TMP* letra_numero(ListaM* lalista, char* nombredisco){
     return aux;
 }
 
+/*para Reporte*/
+int buscar_id(ListaM* lalista, char* buscado){
+    int encontrado=0;
+    if(lalista->inicio == NULL){
+        printf("\n\nAun no hay discos montados\n\n");
+    }else{
+        NodoM* actual = lalista->inicio;
+        while(actual != NULL){
+            if(strcmp(actual->ID, buscado) == 0){
+                encontrado=1;
+                break;
+            }
+            actual=actual->siguiente;
+        }
+    }
+    return encontrado;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /////nada

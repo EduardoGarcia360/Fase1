@@ -4,6 +4,7 @@
 #include "[MIA]RMDISK_201212961.h"
 #include "[MIA]FDISK_201212961.h"
 #include "[MIA]MOUNT_201212961.h"
+#include "[MIA]Reportes_201212961.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -161,6 +162,8 @@ void analizador_general(char* entrada, ListaM* lalistam){
             proceso_fdisk(mi_lista);
         }else if(strcmp("mount", tipo)==0){
             proceso_mount(mi_lista, lalistam);
+        }else if(strcmp("rep", tipo)==0){
+            proceso_rep(mi_lista, lalistam);
         }else{
             printf("Error:\n");
             printf("Tipo desconocido, verifique si pertenece a uno de estos comandos:\n");
@@ -168,9 +171,8 @@ void analizador_general(char* entrada, ListaM* lalistam){
         }
         break;
     }
-    //printf("=====================\n");
+
     limpiar_lista(mi_lista);
-    //printf("=====================\n");
     //showLista(mi_lista);
 }
 

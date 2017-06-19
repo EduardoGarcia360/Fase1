@@ -87,6 +87,7 @@ void generar_id(ListaM* lalistam, char* ruta, char* nombre_particion){
         sprintf(id, "vd%c%i", datos->LETRA, datos->NUMERO);
 
         addDisco(lalistam, ruta, nombre_particion, nombre_disco, datos->LETRA, datos->NUMERO, id);
+        printf("\nLa particion '%s' del disco '%s' fue montada exitosamente con el ID: '%s'\n\n", nombre_particion, nombre_disco, id);
     }
 
 }
@@ -127,30 +128,15 @@ int validar_disco(char* ruta, char* nombre_particion){
             correcto=1;
         }else{
             printf("\n\nError:\n");
-            printf("El nombre '%s' no existe dentro del disco solicitado.\n", nombre_particion);
+            printf("El nombre '%s' no existe dentro del disco solicitado.\n\n", nombre_particion);
         }
         fclose(f);
     }else{
         printf("\n\nError:\n");
         printf("El archivo de disco al que intenta acceder no existe en la ruta indicada.\n");
-        printf("Ruta ingresada: %s\n", ruta);
+        printf("Ruta ingresada: %s\n\n", ruta);
     }
     return correcto;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ////naaaaaaaaaaaaaaaaaaaaaaadaaaa
